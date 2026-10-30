@@ -19,7 +19,7 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
       - run: ruff format --check .
-      - run: find skills tools -name '*.sh' -exec shellcheck {} +
+      - run: find tools -name '*.sh' -exec shellcheck {} +
 
   test:
     runs-on: ${{ matrix.os }}

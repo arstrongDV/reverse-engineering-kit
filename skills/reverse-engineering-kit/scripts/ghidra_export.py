@@ -1,5 +1,5 @@
 # Ghidra post-script: export functions, xrefs, strings and top-N decompilation to one JSON file.
-# Runs inside Ghidra through PyGhidra, started by run_ghidra.sh. It is not a standalone CLI, so the
+# Runs inside Ghidra through PyGhidra, started by run_ghidra.py. It is not a standalone CLI, so the
 # --help/--json contract does not apply. Implemented in Phase 3.
 # @category ReverseEngineeringKit
 

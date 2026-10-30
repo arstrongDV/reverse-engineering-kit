@@ -61,4 +61,5 @@ as you go offline.
 ## Windows
 
 There is no local Windows VM. The `windows-latest` CI job runs the test suite on a fresh Windows
-machine for every push, which gives the same clean-slate result without using local disk.
+machine for every pull request and every push to `main`, which gives the same clean-slate result
+without using local disk. It runs the tests only, not the Ghidra or jadx tools themselves.

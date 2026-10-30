@@ -49,7 +49,7 @@ def test_zip_leaves_out_junk(tmp_path):
 def test_scripts_are_executable_and_documents_are_not(archive):
     scripts = f"{SKILL_DIR.name}/scripts"
     assert stat.S_IMODE(mode_of(archive, f"{scripts}/doctor.py")) == 0o755
-    assert stat.S_IMODE(mode_of(archive, f"{scripts}/run_ghidra.sh")) == 0o755
+    assert stat.S_IMODE(mode_of(archive, f"{scripts}/run_ghidra.py")) == 0o755
     assert stat.S_IMODE(mode_of(archive, f"{SKILL_DIR.name}/SKILL.md")) == 0o644
 
 
