@@ -1,0 +1,7 @@
+{
+  "id": 6,
+  "target": "Webpack bundle without a source map",
+  "deliverable": "Module map and recovered API client",
+  "status": "not_built",
+  "expected": {}
+}

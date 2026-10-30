@@ -1,0 +1,7 @@
+{
+  "id": 10,
+  "target": "Obfuscated JS (string array and flattened control flow)",
+  "deliverable": "Readable deobfuscated code",
+  "status": "not_built",
+  "expected": {}
+}

@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Add, list, update and verify findings in findings.jsonl."""
+
+from __future__ import annotations
+
+from _common import build_parser, not_implemented
+
+
+def main() -> int:
+    args = build_parser(__doc__).parse_args()
+    return not_implemented("ledger.py", phase=1, as_json=args.json)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,19 @@
+# Analysis output: targets and dumps never belong in the repo
+re-work/
+
+# Build output
+dist/
+benchmarks/*/build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# OS and editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,7 @@
+{
+  "id": 7,
+  "target": "Electron app packaged with asar",
+  "deliverable": "Extracted sources and IPC map",
+  "status": "not_built",
+  "expected": {}
+}

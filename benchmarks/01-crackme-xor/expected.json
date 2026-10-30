@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "target": "Crackme with an XOR and shift serial check (C, ELF)",
+  "deliverable": "Correct serial and an explanation",
+  "status": "not_built",
+  "expected": {}
+}

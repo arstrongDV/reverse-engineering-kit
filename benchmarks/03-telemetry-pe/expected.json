@@ -1,0 +1,7 @@
+{
+  "id": 3,
+  "target": "Benign Windows PE telemetry agent",
+  "deliverable": "Behavior profile: registry, network, frame format",
+  "status": "not_built",
+  "expected": {}
+}

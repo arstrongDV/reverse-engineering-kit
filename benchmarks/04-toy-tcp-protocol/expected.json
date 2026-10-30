@@ -1,0 +1,7 @@
+{
+  "id": 4,
+  "target": "Toy TCP protocol and 2 pcap files",
+  "deliverable": "Message dictionary and a working decoder",
+  "status": "not_built",
+  "expected": {}
+}

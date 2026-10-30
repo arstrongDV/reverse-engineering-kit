@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reverse Engineering Kit finding",
+  "description": "One line of findings.jsonl.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "claim", "location", "evidence", "confidence", "verified_by", "hypothesis", "ts"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
+    "claim": { "type": "string", "minLength": 1 },
+    "location": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "string", "minLength": 1 },
+    "confidence": { "enum": ["unknown", "inferred", "observed", "confirmed"] },
+    "verified_by": { "type": ["string", "null"] },
+    "hypothesis": { "type": ["string", "null"], "pattern": "^H[0-9]+$" },
+    "ts": { "type": "string", "format": "date-time" }
+  },
+  "if": {
+    "properties": { "confidence": { "const": "confirmed" } }
+  },
+  "then": {
+    "properties": { "verified_by": { "type": "string", "minLength": 1 } }
+  }
+}
