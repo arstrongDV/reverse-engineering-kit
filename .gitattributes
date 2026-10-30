@@ -1,0 +1,2 @@
+# LF everywhere: a CRLF checkout on Windows breaks shebangs and the zip contents.
+* text=auto eol=lf

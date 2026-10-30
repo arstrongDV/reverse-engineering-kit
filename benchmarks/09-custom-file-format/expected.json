@@ -1,0 +1,7 @@
+{
+  "id": 9,
+  "target": "Custom file format and 3 samples",
+  "deliverable": "Kaitai spec that parses all 3",
+  "status": "not_built",
+  "expected": {}
+}

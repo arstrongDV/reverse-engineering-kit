@@ -1,0 +1,65 @@
+# Disposable Ubuntu guest for running kit scripts and benchmark targets on Apple Silicon.
+# Lifecycle and the limits of this isolation are in tools/vm/README.md.
+minimumLimaVersion: 2.0.0
+vmType: vz
+
+images:
+  - location: https://cloud-images.ubuntu.com/minimal/releases/resolute/release-20261024/ubuntu-26.04-minimal-cloudimg-arm64.img
+    arch: aarch64
+    digest: sha256:b0bb7d1dba37af81c0f74cb5e3bba3a9837e89856e38edf9cecc4a88d6afe5d5
+
+cpus: 2
+memory: 2GiB
+# The disk is sparse, so this is a ceiling rather than an allocation.
+disk: 8GiB
+
+# No host folders and no forwarded ports: the guest sees nothing of the Mac and the Mac's
+# localhost sees nothing of the guest. Files move only through `limactl copy`.
+mounts: []
+portForwards:
+  # Both rules are needed: the 0.0.0.0 rule alone still forwards ports bound to guest loopback.
+  - guestIP: 127.0.0.1
+    proto: any
+    ignore: true
+  - guestIP: 0.0.0.0
+    proto: any
+    ignore: true
+
+containerd:
+  system: false
+  user: false
+
+ssh:
+  loadDotSSHPubKeys: false
+  forwardAgent: false
+  forwardX11: false
+  # Keep this off. On Lima 2.2.1 the vsock listener hit an error loop during boot and wrote
+  # gigabytes of log within minutes.
+  overVsock: false
+
+provision:
+  # Lima reruns this on every boot, and later boots have no network, so it must run only once.
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      test -f /etc/re-kit-provisioned && exit 0
+      apt-get update
+      apt-get install -y --no-install-recommends python3-venv nftables
+      cat >/etc/nftables.conf <<'EOF'
+      #!/usr/sbin/nft -f
+      # Default deny. Only sshd can answer the Mac, and it must stay stateless: Lima's SSH session
+      # opens before these rules load, and a conntrack rule would not recognise it. Without
+      # conntrack, a connection opened while online also cannot outlive the switch to offline.
+      flush ruleset
+      table inet re_kit_offline {
+        chain output {
+          type filter hook output priority 0; policy drop;
+          oif "lo" accept
+          tcp sport 22 accept
+        }
+      }
+      EOF
+      # Blocks every later boot. vm.sh up starts it on the first boot, once provisioning is done.
+      systemctl enable nftables
+      touch /etc/re-kit-provisioned

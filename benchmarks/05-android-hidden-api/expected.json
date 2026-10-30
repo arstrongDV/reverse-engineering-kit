@@ -1,0 +1,7 @@
+{
+  "id": 5,
+  "target": "Android APK with hidden API endpoints",
+  "deliverable": "Endpoint list and auth flow",
+  "status": "not_built",
+  "expected": {}
+}

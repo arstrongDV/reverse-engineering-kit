@@ -1,0 +1,7 @@
+{
+  "id": 8,
+  "target": "Binary with an anti-debug check",
+  "deliverable": "Find and document the check",
+  "status": "not_built",
+  "expected": {}
+}

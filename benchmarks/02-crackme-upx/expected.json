@@ -1,0 +1,7 @@
+{
+  "id": 2,
+  "target": "The same crackme, stripped and packed with UPX",
+  "deliverable": "Identify the packer, unpack, solve",
+  "status": "not_built",
+  "expected": {}
+}
