@@ -7,18 +7,19 @@
   "required": ["id", "claim", "location", "evidence", "confidence", "verified_by", "hypothesis", "ts"],
   "properties": {
     "id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
-    "claim": { "type": "string", "minLength": 1 },
-    "location": { "type": "string", "minLength": 1 },
-    "evidence": { "type": "string", "minLength": 1 },
+    "claim": { "type": "string", "pattern": "\\S" },
+    "location": { "type": "string", "pattern": "\\S" },
+    "evidence": { "type": "string", "pattern": "\\S" },
     "confidence": { "enum": ["unknown", "inferred", "observed", "confirmed"] },
     "verified_by": { "type": ["string", "null"] },
     "hypothesis": { "type": ["string", "null"], "pattern": "^H[0-9]+$" },
-    "ts": { "type": "string", "format": "date-time" }
+    "ts": { "type": "string", "format": "date-time" },
+    "retracted": { "type": "string", "pattern": "\\S" }
   },
   "if": {
     "properties": { "confidence": { "const": "confirmed" } }
   },
   "then": {
-    "properties": { "verified_by": { "type": "string", "minLength": 1 } }
+    "properties": { "verified_by": { "type": "string", "pattern": "\\S" } }
   }
 }

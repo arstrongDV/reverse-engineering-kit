@@ -50,6 +50,25 @@ def test_skill_md_only_points_at_files_that_exist():
     assert not missing
 
 
+# Add a reference here in the phase that writes it.
+FINISHED_REFERENCES = ["legal-safety.md"]
+
+
+@pytest.mark.parametrize("name", FINISHED_REFERENCES)
+def test_finished_references_follow_the_plan(name):
+    text = (SKILL_DIR / "references" / name).read_text(encoding="utf-8")
+    assert "TODO" not in text
+    assert 150 <= len(text.splitlines()) <= 300
+    for heading in (
+        "## When to use this",
+        "## First 15 minutes",
+        "## Signal → next step",
+        "## Common traps",
+        "## Worked example",
+    ):
+        assert heading in text
+
+
 def test_bundled_license_matches_repo_license():
     bundled = (SKILL_DIR / "LICENSE.txt").read_text(encoding="utf-8")
     assert bundled == (REPO_ROOT / "LICENSE").read_text(encoding="utf-8")

@@ -4,7 +4,8 @@ set -euo pipefail
 
 VM=re-kit-linux
 SNAPSHOT_PREFIX="$VM-snap-"
-TEMPLATE="$(cd "$(dirname "$0")" && pwd)/$VM.yaml"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+TEMPLATE="$HERE/$VM.yaml"
 
 usage() {
   cat <<EOF
@@ -15,6 +16,8 @@ usage: vm.sh <command>
   shell [command]    open a shell in the VM, or run one command
   online             allow network access, for installing tools
   offline            block network access again (the state after every boot)
+  install-tools      install the analysis tools, then block the network again
+  check-tools        prove each installed tool works, with the network still blocked
   status             show the VM state and network mode
   snapshot <name>    stop the VM and save a copy-on-write snapshot
   restore <name>     replace the VM with a snapshot and start it
@@ -58,6 +61,18 @@ case "${1:-}" in
     ;;
   offline)
     guest sudo systemctl start nftables
+    ;;
+  install-tools)
+    # A failed install must not leave the VM online.
+    trap 'guest sudo systemctl start nftables' EXIT
+    guest sudo systemctl stop nftables
+    limactl copy "$HERE/install-tools.sh" "$VM:/tmp/install-tools.sh"
+    # Sleep freezes the VM. This stops idle sleep, but closing the lid still freezes it.
+    caffeinate -i limactl shell --workdir / "$VM" bash /tmp/install-tools.sh
+    ;;
+  check-tools)
+    limactl copy "$HERE/install-tools.sh" "$VM:/tmp/install-tools.sh"
+    guest bash /tmp/install-tools.sh --check-only
     ;;
   status)
     limactl list "$VM"

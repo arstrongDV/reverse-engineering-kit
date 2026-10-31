@@ -12,8 +12,9 @@ from conftest import SCRIPTS_DIR
 NON_CLI = {"_common.py", "ghidra_export.py"}
 CLIS = sorted(p for p in SCRIPTS_DIR.glob("*.py") if p.name not in NON_CLI)
 
-# Remove a script from here in the phase that implements it.
-STUBS = CLIS
+# Add a script here in the phase that implements it.
+IMPLEMENTED = {"ledger.py", "make_report.py"}
+STUBS = [p for p in CLIS if p.name not in IMPLEMENTED]
 
 
 def run(script, *args):

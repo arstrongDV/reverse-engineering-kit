@@ -4,7 +4,7 @@ One free, open-source agent skill for reverse engineering binaries, Android pack
 and Electron apps, network protocols and crackmes. It drives standard free tools, and it keeps a
 findings ledger where no claim counts as confirmed until a test proves it.
 
-> **Status: pre-release scaffold.** The structure, packaging and CI are in place. The scripts are
+> **Status: pre-release.** The findings ledger and report generator work. The other scripts are
 > stubs and exit 1 until they are implemented, and no benchmark has been run yet.
 
 ## Planned coverage
