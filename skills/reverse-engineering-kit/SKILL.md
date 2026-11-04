@@ -2,7 +2,7 @@
 name: reverse-engineering-kit
 description: "Evidence-first reverse engineering of software the user owns or is authorized to analyze: native PE, ELF and Mach-O binaries, Android APK, AAB and XAPK packages, minified JS bundles, Electron apps, network protocols and crackme or CTF challenges. Drives Ghidra, rizin, jadx, apktool, webcrack and Frida, and keeps a findings ledger where no claim counts as confirmed until a test proves it. Use when the user asks to reverse engineer a binary, decompile or disassemble an executable, analyze an APK, recover source from minified JS or an Electron app, decode a network protocol or file format, or solve a crackme."
 license: MIT
-compatibility: Requires Python 3.10+. Analysis tools are optional per target and are checked by scripts/doctor.py.
+compatibility: Requires Python 3.10+. LIEF and the analysis tools are optional per target and are checked by scripts/doctor.py.
 metadata:
   author: Arsen Datsenko
   version: "0.1.0"
@@ -10,9 +10,10 @@ metadata:
 
 # Reverse Engineering Kit
 
-**Status: pre-release.** `scripts/ledger.py` and `scripts/make_report.py` work. The other scripts
-are stubs that exit 1 until their build phase lands, so do those steps by hand for now.
-Keep this file under 500 lines; deep detail belongs in `references/`.
+**Status: pre-release.** `scripts/doctor.py`, `scripts/triage.py`, `scripts/ledger.py` and
+`scripts/make_report.py` work. The other scripts are stubs that exit 1, and every reference except
+`references/legal-safety.md` is an outline, until their build phase lands. Do those steps by hand
+for now. Keep this file under 500 lines; deep detail belongs in `references/`.
 
 ## 1. Safety gate
 
@@ -31,7 +32,9 @@ Full policy: [references/legal-safety.md](references/legal-safety.md).
 
 ## 2. Setup
 
-1. Run `scripts/doctor.py` and tell the user about missing tools. It never installs anything.
+1. Run `python scripts/doctor.py --for <goal>`, where the goal is `native`, `android`, `js`,
+   `protocols` or `dynamic`, or leave `--for` out to check everything. Exit code 2 means a tool is
+   missing or cannot work. Show the user its hint and let them install it: doctor installs nothing.
 2. Create the work directory, copy the target into `original/`, record its SHA-256, and start
    `notes.md` from [templates/notes.md](templates/notes.md):
 
@@ -47,19 +50,38 @@ re-work/<target-name>/
 
 ## 3. Triage
 
-Run `scripts/triage.py`, then write a two-sentence first impression before going deeper.
+Run `python scripts/triage.py` in the work directory, or pass `--work re-work/<target-name>`. It
+reads everything in `original/`, saves `triage.json`, and never runs the target. Then write a
+two-sentence first impression in `notes.md` before going deeper.
+
+To look at another file, such as a library unpacked from an APK, pass its path:
+`python scripts/triage.py decompiled/lib/libnative.so`. This prints the result and saves nothing.
+
+Exit code 2 means LIEF is missing: the type, hashes and strings are still right, but sections and
+imports are absent. The `packer` field and `signals` are hints with their evidence, not findings.
+Check them before recording anything in the ledger.
 
 ## 4. Route
 
-| Triage result | Read next |
+`triage.json` lists the files to read in `read_next`. They come from each target's `family`:
+
+| Family | Types | Read next |
+| --- | --- | --- |
+| `native` | `elf`, `pe`, `macho` | [references/native.md](references/native.md) |
+| `android` | `apk`, `aab`, `xapk`, `aar`, `dex` | [references/android.md](references/android.md) |
+| `js` | `javascript`, `source-map`, `asar`, `electron-app` | [references/js-electron.md](references/js-electron.md) |
+| `protocol` | `pcap`, `pcapng`, `har`, `unknown` | [references/protocols.md](references/protocols.md) |
+| `archive` | `zip`, `gzip`, `bzip2`, `xz`, `zstd`, `7z`, `rar`, `tar` | Check that no entry's path leaves the folder, unpack a copy into `decompiled/`, then triage what is inside by path |
+| `later` | `dotnet`, `jar`, `java-class`, `pyc`, `wasm`, `ipa` | This version has no playbook for it. Tell the user, and agree what is still useful |
+| `other` | `text`, `json`, `pdf`, `png`, `jpeg`, `gif`, `sqlite`, `directory` | Not a program. Read it directly, or triage the files in a folder by path |
+
+Some files are worth reading whatever the type:
+
+| When | Read |
 | --- | --- |
-| PE, ELF or Mach-O | [references/native.md](references/native.md) |
-| APK, AAB or XAPK | [references/android.md](references/android.md) |
-| JS bundle or Electron app | [references/js-electron.md](references/js-electron.md) |
-| Traffic capture or unknown data format | [references/protocols.md](references/protocols.md) |
-| Crackme or CTF challenge | [references/crackme-ctf.md](references/crackme-ctf.md) |
-| Packer, anti-debug or obfuscation signs | [references/anti-analysis.md](references/anti-analysis.md) |
-| About to rely on decompiler output | [references/decompiler-lies.md](references/decompiler-lies.md) |
+| `packer` is set or `signals` is not empty (triage adds this to `read_next`) | [references/anti-analysis.md](references/anti-analysis.md) |
+| The user says it is a crackme or CTF challenge | [references/crackme-ctf.md](references/crackme-ctf.md) |
+| You are about to rely on decompiler output | [references/decompiler-lies.md](references/decompiler-lies.md) |
 | A decompiler MCP server is available | [references/mcp-setup.md](references/mcp-setup.md) |
 
 ## 5. Analysis loop
