@@ -2,6 +2,30 @@
   "id": 6,
   "target": "Webpack bundle without a source map",
   "deliverable": "Module map and recovered API client",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "modules": [
+      "index",
+      "api/client",
+      "api/auth",
+      "api/orders",
+      "ui/render"
+    ],
+    "base_url": "https://shop.example/api/v3",
+    "api": [
+      "POST /auth/login",
+      "GET /orders?limit=50",
+      "POST /orders/{id}/cancel"
+    ],
+    "auth": "Authorization: Bearer token from the login reply",
+    "client_header": "X-Client: webshop/3.1"
+  },
+  "artifacts": [
+    "build/main.js"
+  ],
+  "triage": {
+    "type": "javascript",
+    "family": "js",
+    "bundler": "webpack"
+  }
 }

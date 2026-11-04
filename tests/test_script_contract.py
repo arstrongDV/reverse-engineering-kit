@@ -13,7 +13,7 @@ NON_CLI = {"_common.py", "ghidra_export.py"}
 CLIS = sorted(p for p in SCRIPTS_DIR.glob("*.py") if p.name not in NON_CLI)
 
 # Add a script here in the phase that implements it.
-IMPLEMENTED = {"ledger.py", "make_report.py"}
+IMPLEMENTED = {"doctor.py", "ledger.py", "make_report.py", "triage.py"}
 STUBS = [p for p in CLIS if p.name not in IMPLEMENTED]
 
 

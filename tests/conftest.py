@@ -29,10 +29,10 @@ Started.
 """
 
 
-def run_script(name, *args, cwd=None):
+def run_script(name, *args, cwd=None, env=None):
     command = [sys.executable, str(SCRIPTS_DIR / name), *args]
     return subprocess.run(
-        command, capture_output=True, text=True, encoding="utf-8", timeout=30, cwd=cwd
+        command, capture_output=True, text=True, encoding="utf-8", timeout=30, cwd=cwd, env=env
     )
 
 

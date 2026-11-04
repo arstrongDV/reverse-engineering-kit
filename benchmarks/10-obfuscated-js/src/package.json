@@ -1,0 +1,8 @@
+{
+  "name": "rekit-benchmark-obfuscated",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "javascript-obfuscator": "5.9.0"
+  }
+}

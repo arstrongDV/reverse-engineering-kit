@@ -24,11 +24,15 @@ tools/vm/vm.sh up                                   # the network is blocked aft
 limactl copy ./target re-kit-linux:/tmp/target      # the only way files move in or out
 tools/vm/vm.sh shell                                # or: vm.sh shell <command>
 tools/vm/vm.sh check-tools                          # prove each tool works, offline
+tools/vm/vm.sh build-benchmarks                     # see benchmarks/README.md
 tools/vm/vm.sh restore tools                        # throw away everything since the snapshot
 tools/vm/vm.sh down
 ```
 
-To add another tool, open the network only for as long as you need it, then save a new baseline:
+Run the kit's scripts with `/opt/re-kit/venv/bin/python`, which has LIEF installed.
+
+To add another tool, open the network only for as long as you need it, then save a new baseline.
+Saving a snapshot under an existing name replaces it:
 
 ```sh
 tools/vm/vm.sh online
@@ -48,7 +52,12 @@ tools/vm/vm.sh snapshot tools
 | rizin | 0.9.1 | GitHub source release, built in the VM | Analyzes a binary and finds a function |
 | jadx | 1.5.6 | GitHub release | Decompiles a jar and recovers a string |
 | Frida | 17.25.0, tools 14.11.0 | PyPI | Hooks a function, reads its argument and result |
-| apktool | 3.0.3 | GitHub release | Version only, because there is no sample APK yet |
+| LIEF | 1.0.0 | PyPI | Parses a binary and finds a function |
+| UPX | 5.3.0 | GitHub release | Packs a binary that still runs, and unpacks it to the same bytes |
+| Kaitai Struct compiler | 0.11 | GitHub release | Compiles a spec and parses a file with it |
+| webcrack | 2.16.0 | npm | Decodes an escaped string |
+| asar | 4.3.1 | npm | Packs a folder and reads a file back |
+| apktool | 3.0.3 | GitHub release | Decodes the benchmark APK once it is built, otherwise version only |
 | JDK 25, Node 22, npm, gcc | Ubuntu packages | Ubuntu | Used by the tests above, or version only |
 
 Two tools cannot be installed the usual way on arm64 Linux. Ghidra releases have no arm64 Linux
@@ -87,7 +96,7 @@ as you go offline.
   diverge, so `du` reports the full size for each one even though little extra disk is used.
   Snapshots show up in `limactl list` as stopped instances, and `limactl delete` removes them.
 - **The disk is capped at 8 GiB.** It grows into your Mac's free space as the guest fills up. The
-  tools leave about 3.6 GB free inside the guest.
+  tools leave about 3.2 GB free inside the guest.
 - **Guest `/tmp` is a 975 MB RAM disk.** Use `/var/tmp` for anything large.
 
 ## Windows

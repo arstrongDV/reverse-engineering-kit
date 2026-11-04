@@ -2,6 +2,18 @@
   "id": 2,
   "target": "The same crackme, stripped and packed with UPX",
   "deliverable": "Identify the packer, unpack, solve",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "packer": "UPX",
+    "unpack": "upx -d",
+    "serial": "RK26-XOR7-ROL3-A"
+  },
+  "artifacts": [
+    "build/crackme-packed"
+  ],
+  "triage": {
+    "type": "elf",
+    "family": "native",
+    "packer": "UPX"
+  }
 }

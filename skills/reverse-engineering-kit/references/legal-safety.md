@@ -94,7 +94,8 @@ tools patched.
 ### Redaction
 
 Reports travel further than work directories, so treat `REPORT.md`, `findings.jsonl` and
-`notes.md` as shareable. Raw captures and dumps stay in `decompiled/`.
+`notes.md` as shareable. Raw captures and dumps stay in `decompiled/`. `triage.json` quotes raw
+strings from the target, which can include credentials, so keep it out of anything you share.
 
 | Found | Write in the report |
 | --- | --- |

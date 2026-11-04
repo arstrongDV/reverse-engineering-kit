@@ -19,6 +19,13 @@ RIZIN_VERSION=0.9.1
 RIZIN_SHA256=7ac1cd7daca7afdda742e15478b1f747fc1f813e496fee71839d1e109e543dca
 FRIDA_VERSION=17.25.0
 FRIDA_TOOLS_VERSION=14.11.0
+LIEF_VERSION=1.0.0
+KAITAI_VERSION=0.11
+KAITAI_SHA256=28d6b6ec917e394ed41cb6f62169a8f6b584d9a5242cbe0785b0568d95e032ea
+UPX_VERSION=5.3.0
+UPX_SHA256=2a4afa860ac7aa6968f88df7841823746e5d00ba56affdf9342c2f5254fb776f
+WEBCRACK_VERSION=2.16.0
+ASAR_VERSION=4.3.1
 
 # /tmp is held in RAM here and is too small to unpack Ghidra.
 WORK="$(mktemp -d -p /var/tmp)"
@@ -62,6 +69,12 @@ install_frida() {
   python3 -m venv "$PREFIX/venv"
   "$PREFIX/venv/bin/pip" install -q "frida==$FRIDA_VERSION" "frida-tools==$FRIDA_TOOLS_VERSION"
   sudo ln -sf "$PREFIX/venv/bin/frida" "$PREFIX/venv/bin/frida-ps" "$PREFIX/venv/bin/frida-trace" "$BIN/"
+}
+
+install_python_libraries() {
+  if "$PREFIX/venv/bin/python" -c 'import kaitaistruct, lief' 2>/dev/null; then return; fi
+  step "LIEF $LIEF_VERSION and the Kaitai runtime"
+  "$PREFIX/venv/bin/pip" install -q "lief==$LIEF_VERSION" "kaitaistruct==$KAITAI_VERSION"
 }
 
 install_jadx() {
@@ -115,6 +128,31 @@ install_rizin() {
   sudo ldconfig
   # The install step runs as root and leaves root-owned logs in the build folder.
   sudo rm -rf "$WORK/rizin-build" "$src"
+}
+
+install_upx() {
+  if command -v upx >/dev/null; then return; fi
+  step "UPX $UPX_VERSION"
+  local archive
+  archive="$(fetch "https://github.com/upx/upx/releases/download/v$UPX_VERSION/upx-$UPX_VERSION-arm64_linux.tar.xz" "$UPX_SHA256")"
+  tar -xJf "$archive" -C "$WORK"
+  sudo install -m 755 "$WORK/upx-$UPX_VERSION-arm64_linux/upx" "$BIN/upx"
+}
+
+install_kaitai() {
+  if command -v kaitai-struct-compiler >/dev/null; then return; fi
+  step "Kaitai Struct compiler $KAITAI_VERSION"
+  local package
+  package="$(fetch "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/$KAITAI_VERSION/kaitai-struct-compiler_${KAITAI_VERSION}_all.deb" "$KAITAI_SHA256")"
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "$package" >/dev/null
+}
+
+install_node_tools() {
+  if [[ -x "$PREFIX/npm/bin/webcrack" ]]; then return; fi
+  step "webcrack $WEBCRACK_VERSION and asar $ASAR_VERSION"
+  quietly npm install --global --prefix "$PREFIX/npm" --no-audit --no-fund \
+    "webcrack@$WEBCRACK_VERSION" "@electron/asar@$ASAR_VERSION"
+  sudo ln -sf "$PREFIX/npm/bin/webcrack" "$PREFIX/npm/bin/asar" "$BIN/"
 }
 
 # A version number proves little: Ghidra reports one even when it cannot decompile.
@@ -193,7 +231,59 @@ EOF
   "$PREFIX/venv/bin/python" "$sample/frida_check.py" "$sample/sample"
   echo 'frida: hooked add_two and read its argument and return value'
 
-  echo "apktool $(apktool --version) (version check only: there is no sample APK yet)"
+  cat >"$sample/lief_check.py" <<'EOF'
+import sys
+
+import lief
+
+binary = lief.parse(sys.argv[1])
+names = [symbol.name for symbol in binary.symbols]
+sys.exit(0 if "add_two" in names and binary.sections else 1)
+EOF
+  "$PREFIX/venv/bin/python" "$sample/lief_check.py" "$sample/sample"
+  echo 'lief: parsed the sample and found add_two'
+
+  gcc -O1 -static -o "$sample/static" "$sample/sample.c"
+  upx -q -o "$sample/packed" "$sample/static" >/dev/null
+  "$sample/packed"
+  upx -q -d -o "$sample/unpacked" "$sample/packed" >/dev/null
+  cmp "$sample/static" "$sample/unpacked"
+  echo 'upx: packed a binary that still runs, and unpacked it to the same bytes'
+
+  cat >"$sample/check.ksy" <<'EOF'
+meta:
+  id: check
+  endian: le
+seq:
+  - id: value
+    type: u4
+EOF
+  kaitai-struct-compiler -t python --outdir "$sample" "$sample/check.ksy" >/dev/null
+  printf '\x2a\0\0\0' >"$sample/check.bin"
+  (cd "$sample" && "$PREFIX/venv/bin/python" -c 'import check; assert check.Check.from_file("check.bin").value == 42')
+  echo 'kaitai: compiled a spec and parsed a file with it'
+
+  printf 'console.log("\\x72\\x65\\x2d\\x6b\\x69\\x74");\n' >"$sample/encoded.js"
+  webcrack "$sample/encoded.js" >"$sample/decoded.js" 2>/dev/null
+  grep -q 're-kit' "$sample/decoded.js"
+  echo 'webcrack: decoded an escaped string'
+
+  mkdir -p "$sample/app"
+  echo 're-kit-check' >"$sample/app/marker.txt"
+  asar pack "$sample/app" "$sample/app.asar"
+  (cd "$sample" && asar extract-file app.asar marker.txt && grep -q 're-kit-check' marker.txt)
+  echo 'asar: packed a folder and read a file back'
+
+  if [[ -f /tmp/sample.apk ]]; then
+    apktool d -q -f -o "$sample/apktool" /tmp/sample.apk
+    grep -q 'com.fieldnotes.demo' "$sample/apktool/AndroidManifest.xml"
+    echo 'apktool: decoded the benchmark APK and read its manifest'
+    jadx -q -d "$sample/jadx-apk" /tmp/sample.apk
+    grep -rq 'X-App-Key' "$sample/jadx-apk/sources"
+    echo 'jadx: decompiled the benchmark APK'
+  else
+    echo "apktool $(apktool --version) (version only: run build-benchmarks for a real APK test)"
+  fi
   echo "java $(java -version 2>&1 | head -n 1)"
   echo "node $(node --version), npm $(npm --version), $(python3 --version)"
 }
@@ -205,6 +295,10 @@ fi
 
 install_packages
 install_frida
+install_python_libraries
+install_upx
+install_kaitai
+install_node_tools
 install_jadx
 install_apktool
 install_ghidra

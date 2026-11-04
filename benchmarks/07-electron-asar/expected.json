@@ -2,6 +2,34 @@
   "id": 7,
   "target": "Electron app packaged with asar",
   "deliverable": "Extracted sources and IPC map",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "files": [
+      "package.json",
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "lib/store.js"
+    ],
+    "ipc": {
+      "invoke": [
+        "notes:list",
+        "notes:save",
+        "notes:delete",
+        "app:version"
+      ],
+      "send": [
+        "window:minimize"
+      ]
+    },
+    "bridge": "window.notes, exposed in preload.js"
+  },
+  "artifacts": [
+    "build/resources/app.asar"
+  ],
+  "triage": {
+    "type": "asar",
+    "family": "js"
+  }
 }

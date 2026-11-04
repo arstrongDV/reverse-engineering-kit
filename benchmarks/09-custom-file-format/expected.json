@@ -2,6 +2,29 @@
   "id": 9,
   "target": "Custom file format and 3 samples",
   "deliverable": "Kaitai spec that parses all 3",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "magic": "RKF1",
+    "byte_order": "little",
+    "header": [
+      "version u16",
+      "num_records u16"
+    ],
+    "record": [
+      "kind u8: 1 text, 2 number, 3 blob",
+      "length u16",
+      "value"
+    ],
+    "footer": "CRC-32 of everything before it",
+    "check": "a Kaitai spec parses all 3 samples"
+  },
+  "artifacts": [
+    "build/alpha.rkf",
+    "build/bravo.rkf",
+    "build/charlie.rkf"
+  ],
+  "triage": {
+    "type": "unknown",
+    "family": "protocol"
+  }
 }

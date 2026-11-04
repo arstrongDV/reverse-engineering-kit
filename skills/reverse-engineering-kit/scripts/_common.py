@@ -14,6 +14,8 @@ EXIT_MISSING_TOOL = 2
 EXIT_UNSUPPORTED = 3
 EXIT_USAGE = 64
 
+LIEF_HINT = "python -m pip install lief==1.0.0"
+
 
 class KitError(Exception):
     """A failure the script reports as a message and an exit code, not a traceback."""

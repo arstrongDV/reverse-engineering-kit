@@ -1,0 +1,6 @@
+{
+  "name": "rekit-benchmark-notes",
+  "version": "1.4.0",
+  "description": "Benchmark 7: a small Electron app",
+  "main": "main.js"
+}
