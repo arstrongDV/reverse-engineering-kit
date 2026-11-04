@@ -2,6 +2,41 @@
   "id": 3,
   "target": "Benign Windows PE telemetry agent",
   "deliverable": "Behavior profile: registry, network, frame format",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "registry": {
+      "key": "HKCU\\Software\\ReKitBench\\Telemetry",
+      "values": [
+        "DeviceId",
+        "IntervalSeconds"
+      ]
+    },
+    "network": {
+      "host": "127.0.0.1",
+      "port": 47800,
+      "protocol": "TCP"
+    },
+    "frame": {
+      "byte_order": "little",
+      "fields": [
+        "magic u32 'RKTL'",
+        "version u8 = 2",
+        "type u8 = 1 heartbeat",
+        "length u16",
+        "sequence u32",
+        "payload",
+        "checksum u16"
+      ],
+      "payload": "device=<id>;uptime=<ms>;interval=<seconds>",
+      "checksum": "rotate the 16-bit sum left by 1, then XOR each byte of the header and payload"
+    },
+    "persistence": "none"
+  },
+  "artifacts": [
+    "build/agent.exe"
+  ],
+  "triage": {
+    "type": "pe",
+    "family": "native"
+  }
 }

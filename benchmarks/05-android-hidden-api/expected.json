@@ -2,6 +2,23 @@
   "id": 5,
   "target": "Android APK with hidden API endpoints",
   "deliverable": "Endpoint list and auth flow",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "base_url": "https://api.fieldnotes.example",
+    "endpoints": [
+      "POST /v2/session",
+      "POST /v2/notes/sync",
+      "POST /internal/diag"
+    ],
+    "hidden": "/internal/diag runs only when the debug_menu preference is true",
+    "auth_flow": "POST device_id with an X-App-Key header to /v2/session, read token from the reply, then send it as Authorization: Bearer",
+    "app_key": "fn-demo-not-a-real-key"
+  },
+  "artifacts": [
+    "build/fieldnotes.apk"
+  ],
+  "triage": {
+    "type": "apk",
+    "family": "android"
+  }
 }

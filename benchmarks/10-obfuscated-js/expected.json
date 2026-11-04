@@ -2,6 +2,23 @@
   "id": 10,
   "target": "Obfuscated JS (string array and flattened control flow)",
   "deliverable": "Readable deobfuscated code",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "endpoint": "https://telemetry.example/collect",
+    "salt": "rekit-benchmark",
+    "functions": [
+      "score: rolling hash, multiply by 31 modulo 65521",
+      "signature: join the hex scores of salt + value with -",
+      "buildReport: sort events by time and build the report"
+    ],
+    "output_when_run": "{\"user\":\"demo\",\"count\":2,\"first\":\"boot\",\"signature\":\"4c4-f067\",\"target\":\"https://telemetry.example/collect\"}"
+  },
+  "artifacts": [
+    "build/app.obfuscated.js"
+  ],
+  "triage": {
+    "type": "javascript",
+    "family": "js",
+    "signal": "obfuscated-js"
+  }
 }

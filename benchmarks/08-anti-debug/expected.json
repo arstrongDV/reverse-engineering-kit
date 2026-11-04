@@ -2,6 +2,22 @@
   "id": 8,
   "target": "Binary with an anti-debug check",
   "deliverable": "Find and document the check",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "checks": [
+      "TracerPid in /proc/self/status",
+      "ptrace(PTRACE_TRACEME)"
+    ],
+    "when_detected": "prints a decoy line and exits 0",
+    "message": "The launch code is ORCHID-42",
+    "message_key": "0x2a"
+  },
+  "artifacts": [
+    "build/antidebug"
+  ],
+  "triage": {
+    "type": "elf",
+    "family": "native",
+    "signal": "anti-debug"
+  }
 }

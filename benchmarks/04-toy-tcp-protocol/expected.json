@@ -2,6 +2,35 @@
   "id": 4,
   "target": "Toy TCP protocol and 2 pcap files",
   "deliverable": "Message dictionary and a working decoder",
-  "status": "not_built",
-  "expected": {}
+  "status": "built",
+  "expected": {
+    "port": 7500,
+    "byte_order": "big",
+    "header": [
+      "magic u16 = 0xB17E",
+      "type u8",
+      "flags u8",
+      "sequence u16",
+      "length u16"
+    ],
+    "trailer": "CRC-16/CCITT-FALSE over header and payload",
+    "messages": {
+      "1": "HELLO client name",
+      "2": "CHALLENGE 8-byte nonce",
+      "3": "RESPONSE nonce XOR 0x5C",
+      "4": "GET key u16",
+      "5": "VALUE key u16, value i32",
+      "6": "ERROR code u8",
+      "7": "BYE"
+    },
+    "check": "the decoder must parse session-holdout.pcap, which was not used during analysis, including split and shared TCP segments"
+  },
+  "artifacts": [
+    "build/session-analysis.pcap",
+    "build/session-holdout.pcap"
+  ],
+  "triage": {
+    "type": "pcap",
+    "family": "protocol"
+  }
 }

@@ -6,6 +6,8 @@ VM=re-kit-linux
 SNAPSHOT_PREFIX="$VM-snap-"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE="$HERE/$VM.yaml"
+BENCHMARKS="$HERE/../../benchmarks"
+GUEST_BENCHMARKS=/var/tmp/benchmarks
 
 usage() {
   cat <<EOF
@@ -18,8 +20,9 @@ usage: vm.sh <command>
   offline            block network access again (the state after every boot)
   install-tools      install the analysis tools, then block the network again
   check-tools        prove each installed tool works, with the network still blocked
+  build-benchmarks   build the benchmark targets in the VM and copy them to benchmarks/*/build
   status             show the VM state and network mode
-  snapshot <name>    stop the VM and save a copy-on-write snapshot
+  snapshot <name>    stop the VM and save a copy-on-write snapshot, replacing one of that name
   restore <name>     replace the VM with a snapshot and start it
   snapshots          list snapshots
 EOF
@@ -72,7 +75,27 @@ case "${1:-}" in
     ;;
   check-tools)
     limactl copy "$HERE/install-tools.sh" "$VM:/tmp/install-tools.sh"
+    apk="$BENCHMARKS/05-android-hidden-api/build/fieldnotes.apk"
+    if [[ -f "$apk" ]]; then
+      limactl copy "$apk" "$VM:/tmp/sample.apk"
+    fi
     guest bash /tmp/install-tools.sh --check-only
+    ;;
+  build-benchmarks)
+    # A failed build must not leave the VM online.
+    trap 'guest sudo systemctl start nftables' EXIT
+    guest rm -rf "$GUEST_BENCHMARKS"
+    limactl copy --recursive "$BENCHMARKS" "$VM:$GUEST_BENCHMARKS"
+    limactl copy "$HERE/build-benchmarks.sh" "$VM:/tmp/build-benchmarks.sh"
+    guest sudo systemctl stop nftables
+    caffeinate -i limactl shell --workdir / "$VM" bash /tmp/build-benchmarks.sh "$GUEST_BENCHMARKS"
+    guest sudo systemctl start nftables
+    # shellcheck disable=SC2016
+    guest bash -c 'cd "$1" && tar -cf /tmp/benchmark-builds.tar ./*/build' _ "$GUEST_BENCHMARKS"
+    host_copy="$(mktemp)"
+    limactl copy "$VM:/tmp/benchmark-builds.tar" "$host_copy"
+    tar -C "$BENCHMARKS" -xf "$host_copy"
+    rm -f "$host_copy"
     ;;
   status)
     limactl list "$VM"
@@ -87,6 +110,9 @@ case "${1:-}" in
   snapshot)
     require_name "${2:-}"
     stop_vm
+    if exists "$SNAPSHOT_PREFIX$2"; then
+      limactl delete "$SNAPSHOT_PREFIX$2"
+    fi
     limactl clone --tty=false "$VM" "$SNAPSHOT_PREFIX$2"
     ;;
   restore)
