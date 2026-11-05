@@ -21,6 +21,7 @@ usage: vm.sh <command>
   install-tools      install the analysis tools, then block the network again
   check-tools        prove each installed tool works, with the network still blocked
   build-benchmarks   build the benchmark targets in the VM and copy them to benchmarks/*/build
+  check-mcp          install GhidraMCP and r2mcp, then test both offline on benchmark 1
   status             show the VM state and network mode
   snapshot <name>    stop the VM and save a copy-on-write snapshot, replacing one of that name
   restore <name>     replace the VM with a snapshot and start it
@@ -96,6 +97,22 @@ case "${1:-}" in
     limactl copy "$VM:/tmp/benchmark-builds.tar" "$host_copy"
     tar -C "$BENCHMARKS" -xf "$host_copy"
     rm -f "$host_copy"
+    ;;
+  check-mcp)
+    crackme="$BENCHMARKS/01-crackme-xor/build/crackme"
+    if [[ ! -f "$crackme" ]]; then
+      echo "vm.sh: $crackme is missing; run build-benchmarks first" >&2
+      exit 1
+    fi
+    # A failed install must not leave the VM online.
+    trap 'guest sudo systemctl start nftables' EXIT
+    limactl copy "$HERE/check-mcp.sh" "$VM:/tmp/check-mcp.sh"
+    limactl copy "$HERE/mcp_check.py" "$VM:/tmp/mcp_check.py"
+    limactl copy "$crackme" "$VM:/tmp/crackme"
+    guest sudo systemctl stop nftables
+    caffeinate -i limactl shell --workdir / "$VM" bash /tmp/check-mcp.sh --install
+    guest sudo systemctl start nftables
+    guest bash /tmp/check-mcp.sh --check
     ;;
   status)
     limactl list "$VM"

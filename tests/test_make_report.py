@@ -4,7 +4,7 @@ import hashlib
 import json
 
 import pytest
-from conftest import SKILL_DIR, record, run_script
+from conftest import SKILL_DIR, confirm, record, run_script, write_check
 
 
 def report(work, *args):
@@ -25,7 +25,7 @@ def test_five_findings_become_a_clean_report(work):
     record(work, "--claim", "Serial length is 16", "--confidence", "observed")
     record(work, "--claim", "check_serial returns 1 on success", "--confidence", "observed")
     record(work, "--claim", "What does sub_4011 do?")
-    ledger(work, "verify", "F-002", "--by", "tests/test_key.py")
+    confirm(work, "F-002", kind="algorithm", check=write_check(work, name="test_key.py"))
 
     assert report(work).returncode == 0
     text = (work / "REPORT.md").read_text("utf-8")
@@ -35,7 +35,8 @@ def test_five_findings_become_a_clean_report(work):
     assert hashlib.sha256(b"target bytes").hexdigest() in text
     assert "Own crackme, built for this test" in text
     assert "F-002" in body_of(text, "Confirmed findings")
-    assert "Verified by: tests/test_key.py" in body_of(text, "Confirmed findings")
+    verified = "Verified by: tests/test_key.py, a algorithm check: 3 cases passed, none failed"
+    assert verified in body_of(text, "Confirmed findings")
     assert "F-003" in body_of(text, "Observed findings")
     assert "F-001" in body_of(text, "Inferred findings")
     assert "F-005" in body_of(text, "Gaps and next experiments")
@@ -50,12 +51,44 @@ def test_an_unverified_finding_never_reaches_the_confirmed_section(work):
 
 def test_retracted_findings_leave_their_section_but_stay_visible(work):
     record(work, "--claim", "The key is 0x5A")
-    ledger(work, "verify", "F-001", "--by", "tests/a.py")
+    confirm(work, "F-001")
     ledger(work, "retract", "F-001", "--reason", "the test read the wrong offset")
     report(work)
     text = (work / "REPORT.md").read_text("utf-8")
     assert "F-001" not in body_of(text, "Confirmed findings")
     assert "the test read the wrong offset" in body_of(text, "Retracted findings")
+
+
+def test_a_decoder_check_names_the_capture_it_parsed(work):
+    record(work, "--claim", "The decoder parses every frame")
+    (work / "fresh.pcapng").write_bytes(b"capture")
+    confirm(work, "F-001", "--input", "fresh.pcapng", kind="decoder")
+    report(work)
+    text = body_of((work / "REPORT.md").read_text("utf-8"), "Confirmed findings")
+    assert "a decoder check: 3 cases passed, none failed, on fresh.pcapng" in text
+
+
+@pytest.mark.parametrize("change", ["edit", "delete"])
+def test_refuses_a_confirmed_finding_whose_check_changed(work, change):
+    record(work)
+    confirm(work, "F-001")
+    check = work / "tests" / "check.py"
+    if change == "edit":
+        check.write_text("print('PASS')\n", "utf-8")
+    else:
+        check.unlink()
+    result = report(work)
+    assert result.returncode == 1
+    assert "F-001" in result.stderr
+    assert not (work / "REPORT.md").exists()
+
+
+def test_a_retracted_finding_needs_no_valid_check(work):
+    record(work)
+    confirm(work, "F-001")
+    ledger(work, "retract", "F-001", "--reason", "wrong")
+    (work / "tests" / "check.py").unlink()
+    assert report(work).returncode == 0
 
 
 @pytest.mark.parametrize("section", ["Authorization", "Summary", "Gaps"])

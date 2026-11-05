@@ -4,8 +4,8 @@ One free, open-source agent skill for reverse engineering binaries, Android pack
 and Electron apps, network protocols and crackmes. It drives standard free tools, and it keeps a
 findings ledger where no claim counts as confirmed until a test proves it.
 
-> **Status: pre-release.** Every script works and has tests. No agent has run the benchmarks yet,
-> and the guide to decompiler MCP servers is still an outline.
+> **Status: pre-release.** Every script and reference is written and tested. No agent has run the
+> benchmarks yet.
 
 ## Planned coverage
 

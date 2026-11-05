@@ -524,7 +524,9 @@ ROUTE_ROW = re.compile(r"^\| `(\w+)` \| (.+?) \| (.+?) \|$", re.MULTILINE)
 
 def routing_table():
     text = (SKILL_DIR / "SKILL.md").read_text("utf-8")
-    return {family: (kinds, target) for family, kinds, target in ROUTE_ROW.findall(text)}
+    # Other sections have tables keyed by a code word too, such as the ledger's --kind values.
+    section = text.split("\n## 4. Route\n", 1)[1].split("\n## ", 1)[0]
+    return {family: (kinds, target) for family, kinds, target in ROUTE_ROW.findall(section)}
 
 
 def test_skill_md_routes_every_family_triage_can_report():

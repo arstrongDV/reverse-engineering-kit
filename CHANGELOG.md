@@ -39,6 +39,14 @@ All notable changes to this project are documented here. The format follows
   crypto, network and certificate pinning. The pinning template only observes.
 - The native, Android, JS and Electron, protocol, crackme, anti-analysis and decompiler-error
   references.
+- `ledger.py audit` checks that each confirmed finding still matches the check and inputs that
+  proved it, and `--rerun` runs every check again.
+- `ledger.py resume` prints where an analysis stands: findings by confidence, open findings,
+  stale confirmations, the hypotheses and the last session log entry.
+- `templates/check.py`, a differential test in the form `verify` runs, and `## Hypotheses`
+  and dated session log entries in the `notes.md` template.
+- `references/mcp-setup.md`, with GhidraMCP 2.0 headless and r2mcp 1.9.0 setups tested in the
+  VM, and `vm.sh check-mcp`, which repeats those tests.
 
 ### Changed
 
@@ -49,3 +57,8 @@ All notable changes to this project are documented here. The format follows
 - Analysis tools are started through one runner that kills their whole process tree on timeout,
   gives them a copy of the target under a plain name, and refuses arguments that `cmd.exe` would
   read as commands.
+- `ledger.py verify` runs the check it is given, a Python script in the work directory's
+  `tests/`, and confirms the finding only if the check passes with enough cases for the claim's
+  `--kind`. The finding stores the result and the SHA-256 of the check and its inputs, and
+  `make_report.py` refuses a confirmed finding whose check or input has changed. Before, `--by`
+  accepted any text without running anything.

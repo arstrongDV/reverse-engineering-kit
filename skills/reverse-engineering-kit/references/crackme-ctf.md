@@ -66,13 +66,13 @@ check_serial(0xffffc13b7da9 "RK26-XOR7-ROL3-A", ...) = 0x1
 
 A finding moves through the ledger like any other. The claim is the answer, and the check is a
 script that runs the unmodified program, inside the VM, on the answer and on inputs that must
-fail. A template for that script:
+fail. Save it as `tests/check_serial.py` in the work directory:
 
 ```python
 import subprocess
 import sys
 
-TARGET = "./crackme"
+TARGET = "original/crackme"
 CASES = {"RK26-XOR7-ROL3-A": True, "RK26-XOR7-ROL3-B": False, "short": False}
 
 
@@ -80,14 +80,18 @@ def accepted(answer):
     return subprocess.run([TARGET, answer], capture_output=True).returncode == 0
 
 
-failures = [answer for answer, expected in CASES.items() if accepted(answer) != expected]
-print("all cases agree" if not failures else f"disagree on: {failures}")
+failures = 0
+for answer, expected in CASES.items():
+    verdict = "PASS" if accepted(answer) == expected else "FAIL"
+    failures += verdict == "FAIL"
+    print(f"{verdict} {answer!r}: expected {'accepted' if expected else 'rejected'}")
 sys.exit(1 if failures else 0)
 ```
 
-Run it, see it pass, and only then name it:
-`python scripts/ledger.py verify F-003 --by tests/check_serial.py`. Keep the script in the work
-directory so the report can point at it.
+Then let the ledger run it, inside the VM as well:
+`python scripts/ledger.py verify F-003 --kind function --by tests/check_serial.py`. It confirms
+the finding only when all three cases print `PASS`, and stores them with the script's SHA-256.
+For a check of a different shape, start from [templates/check.py](../templates/check.py).
 
 ## Common traps
 

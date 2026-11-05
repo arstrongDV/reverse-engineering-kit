@@ -49,6 +49,26 @@ def record(work, *extra, check=True):
     return json.loads(result.stdout)["finding"]["id"]
 
 
+PASSING_CHECK = "for case in ('a', 'b', 'c'):\n    print(f'PASS {case}')\n"
+
+
+def write_check(work, body=PASSING_CHECK, name="check.py"):
+    """Write a check into the work directory's tests/ folder and return the name verify takes."""
+    folder = work / "tests"
+    folder.mkdir(exist_ok=True)
+    (folder / name).write_text(body, encoding="utf-8")
+    return f"tests/{name}"
+
+
+def confirm(work, finding_id, *extra, kind="behavior", check=None):
+    """Confirm a finding the only way the ledger allows: by running a check that passes."""
+    by = check or write_check(work)
+    arguments = ["verify", finding_id, "--by", by, "--kind", kind, *extra]
+    result = run_script("ledger.py", "--work", str(work), *arguments)
+    assert result.returncode == 0, result.stdout + result.stderr
+    return by
+
+
 @pytest.fixture
 def work(tmp_path):
     folder = tmp_path / "re-work" / "demo"
