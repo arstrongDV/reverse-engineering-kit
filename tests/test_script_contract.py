@@ -8,12 +8,20 @@ import sys
 import pytest
 from conftest import SCRIPTS_DIR
 
-# Runs inside Ghidra, so it is not a command line tool.
-NON_CLI = {"_common.py", "ghidra_export.py"}
+NON_CLI = {"_common.py"}
 CLIS = sorted(p for p in SCRIPTS_DIR.glob("*.py") if p.name not in NON_CLI)
 
 # Add a script here in the phase that implements it.
-IMPLEMENTED = {"doctor.py", "ledger.py", "make_report.py", "triage.py"}
+IMPLEMENTED = {
+    "decompile_apk.py",
+    "doctor.py",
+    "find_endpoints.py",
+    "ledger.py",
+    "make_report.py",
+    "recover_js.py",
+    "run_ghidra.py",
+    "triage.py",
+}
 STUBS = [p for p in CLIS if p.name not in IMPLEMENTED]
 
 

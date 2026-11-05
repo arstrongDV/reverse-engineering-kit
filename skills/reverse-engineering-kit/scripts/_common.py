@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import shutil
+import signal
+import subprocess
 import sys
 from pathlib import Path
 
@@ -15,6 +19,10 @@ EXIT_UNSUPPORTED = 3
 EXIT_USAGE = 64
 
 LIEF_HINT = "python -m pip install lief==1.0.0"
+
+SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
+# cmd.exe parses the arguments of a .bat or .cmd file a second time, as commands.
+BATCH_SAFE_ARGUMENT = re.compile(r"[\w .:\\/=+,@-]*")
 
 
 class KitError(Exception):
@@ -63,6 +71,75 @@ def write_atomic(path: Path, text: str) -> None:
     # backslashreplace keeps stray bytes from a target as JSON escapes instead of failing.
     temporary.write_text(text, encoding="utf-8", errors="backslashreplace", newline="\n")
     os.replace(temporary, path)
+
+
+def stage_input(path: Path, work: Path) -> Path:
+    """Give tools a copy with a plain name, because a name from a target can hold shell syntax."""
+    if SAFE_NAME.fullmatch(path.name):
+        return path
+    folder = work / "decompiled" / "input"
+    folder.mkdir(parents=True, exist_ok=True)
+    suffix = "".join(c for c in path.suffix if c.isalnum() or c == ".")[:10]
+    staged = folder / f"target{suffix}"
+    shutil.copyfile(path, staged)
+    return staged
+
+
+def safe_file_name(name: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]", "_", name).strip("._")[:80]
+    return cleaned or "unnamed"
+
+
+def require_tool(name: str, hint: str) -> str:
+    path = shutil.which(name)
+    if not path:
+        raise KitError(f"{name} is not installed. {hint}", EXIT_MISSING_TOOL)
+    return path
+
+
+def run_tool(command: list[str], timeout: int, **options) -> subprocess.CompletedProcess:
+    """Run an analysis tool, killing its whole process tree if it overruns."""
+    if command[0].lower().endswith((".bat", ".cmd")):
+        for argument in command[1:]:
+            if not BATCH_SAFE_ARGUMENT.fullmatch(argument):
+                raise KitError(
+                    f"refusing to pass {argument!r} to {Path(command[0]).name}, because cmd.exe "
+                    "would read it as a command. Use a work directory with a plain path.",
+                    EXIT_UNSUPPORTED,
+                )
+    group = {"start_new_session": True} if os.name != "nt" else {}
+    try:
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            errors="replace",
+            **group,
+            **options,
+        )
+    except OSError as error:
+        raise KitError(f"could not run {command[0]}: {error}", EXIT_MISSING_TOOL) from error
+    try:
+        output, _ = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        kill_tree(process)
+        raise KitError(f"{Path(command[0]).name} did not finish within {timeout} seconds") from None
+    return subprocess.CompletedProcess(command, process.returncode, output, "")
+
+
+def kill_tree(process: subprocess.Popen) -> None:
+    # Ghidra and jadx start a JVM as a child, which a plain kill would leave running.
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(process.pid)], capture_output=True)
+    else:
+        os.killpg(process.pid, signal.SIGKILL)
+    process.communicate()
+
+
+def tail(text: str, lines: int = 20) -> str:
+    return "\n".join(text.strip().splitlines()[-lines:])
 
 
 def emit(payload: dict, text: str, as_json: bool) -> None:

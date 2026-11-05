@@ -51,7 +51,16 @@ def test_skill_md_only_points_at_files_that_exist():
 
 
 # Add a reference here in the phase that writes it.
-FINISHED_REFERENCES = ["legal-safety.md"]
+FINISHED_REFERENCES = [
+    "android.md",
+    "anti-analysis.md",
+    "crackme-ctf.md",
+    "decompiler-lies.md",
+    "js-electron.md",
+    "legal-safety.md",
+    "native.md",
+    "protocols.md",
+]
 
 
 @pytest.mark.parametrize("name", FINISHED_REFERENCES)

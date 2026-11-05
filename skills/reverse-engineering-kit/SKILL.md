@@ -10,10 +10,9 @@ metadata:
 
 # Reverse Engineering Kit
 
-**Status: pre-release.** `scripts/doctor.py`, `scripts/triage.py`, `scripts/ledger.py` and
-`scripts/make_report.py` work. The other scripts are stubs that exit 1, and every reference except
-`references/legal-safety.md` is an outline, until their build phase lands. Do those steps by hand
-for now. Keep this file under 500 lines; deep detail belongs in `references/`.
+**Status: pre-release.** Every script works. `references/mcp-setup.md` is still an outline, so
+set up decompiler MCP servers by hand for now. Keep this file under 500 lines; deep detail belongs
+in `references/`.
 
 ## 1. Safety gate
 
@@ -83,6 +82,18 @@ Some files are worth reading whatever the type:
 | The user says it is a crackme or CTF challenge | [references/crackme-ctf.md](references/crackme-ctf.md) |
 | You are about to rely on decompiler output | [references/decompiler-lies.md](references/decompiler-lies.md) |
 | A decompiler MCP server is available | [references/mcp-setup.md](references/mcp-setup.md) |
+
+The playbooks use these scripts. Each writes under `decompiled/` and prints a summary; `--json`
+gives the same as JSON, and `--help` lists the options.
+
+| Script | What it does |
+| --- | --- |
+| `scripts/run_ghidra.py` | Ghidra headless: functions, imports and callers, strings and users, decompiled C; `--function` and `--bytes` for follow-ups |
+| `scripts/decompile_apk.py` | jadx and apktool, plus a summary of what the manifest exposes |
+| `scripts/recover_js.py` | Source maps, webcrack, safe asar extraction and an Electron IPC map |
+| `scripts/find_endpoints.py` | URLs, API paths, HTTP calls, auth headers and masked secrets, with file and line |
+| `scripts/frida/*.js` | Hook templates for comparisons, crypto, network and pinning, for a confirmed VM only |
+| `templates/protocol_decoder.py` | A pcap and pcapng decoder to copy and adapt |
 
 ## 5. Analysis loop
 

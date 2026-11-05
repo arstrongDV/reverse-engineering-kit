@@ -3,7 +3,8 @@
 A free, MIT-licensed skill for evidence-first reverse engineering of software you own or are
 authorized to analyze.
 
-**Status: pre-release scaffold.** The scripts are stubs and exit 1 until they are implemented.
+**Status: pre-release.** Every script works and has tests. No agent has run the benchmarks yet, and
+the guide to decompiler MCP servers is still an outline.
 
 ## Using it
 

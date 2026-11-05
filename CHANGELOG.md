@@ -24,8 +24,28 @@ All notable changes to this project are documented here. The format follows
 - A routing table in `SKILL.md` that matches what `triage.py` reports, kept in step by a test.
 - Source, answers and a VM build script for all 10 benchmarks.
 - LIEF, UPX, the Kaitai Struct compiler, webcrack and asar in the test VM.
+- `run_ghidra.py` runs Ghidra headless and exports functions, imports with their callers, strings
+  with their users, and decompiled C, one file per function. Later runs reuse the analysis, and
+  `--function` and `--bytes` ask for more.
+- `decompile_apk.py` runs jadx and apktool and summarizes the manifest: exported components,
+  permissions, deep links, the network security config and frameworks. It unpacks XAPK files,
+  because jadx writes no code for them.
+- `recover_js.py` recovers sources from source maps, runs webcrack, extracts asar archives with
+  path checks, and maps an Electron app's IPC channels and risky settings. It never fetches a
+  remote source map.
+- `find_endpoints.py` lists URLs, API paths, HTTP calls, auth headers and secrets with file and
+  line. Secrets are always masked, and library code is counted separately.
+- A working pcap and pcapng decoder template, and Frida 17 hook templates for comparisons,
+  crypto, network and certificate pinning. The pinning template only observes.
+- The native, Android, JS and Electron, protocol, crackme, anti-analysis and decompiler-error
+  references.
 
 ### Changed
 
 - `run_ghidra` and `decompile_apk` are Python instead of shell, so they run on Windows.
 - `vm.sh snapshot` replaces an existing snapshot of the same name instead of failing.
+- The Ghidra export is a Java script instead of Python. Ghidra compiles Java itself, while Python
+  scripts need PyGhidra, whose bundled packages stop at Python 3.13.
+- Analysis tools are started through one runner that kills their whole process tree on timeout,
+  gives them a copy of the target under a plain name, and refuses arguments that `cmd.exe` would
+  read as commands.
