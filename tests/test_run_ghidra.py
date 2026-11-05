@@ -183,7 +183,8 @@ def test_two_binaries_need_a_choice(binary, ghidra):
 def test_a_name_with_shell_syntax_reaches_ghidra_as_a_plain_copy(work, ghidra):
     environment, root = ghidra
     (work / "original" / "target.bin").unlink()
-    (work / "original" / "a&b|c.exe").write_bytes(samples.pe())
+    # Legal in a Windows file name, yet each of & space ^ means something to cmd.exe.
+    (work / "original" / "a&b ^c.exe").write_bytes(samples.pe())
     result, _ = ghidra_run(work, environment)
     assert result.returncode == 0, result.stdout
     imported = calls(root)[0][calls(root)[0].index("-import") + 1]
