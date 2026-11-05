@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -55,3 +56,26 @@ def work(tmp_path):
     (folder / "original" / "target.bin").write_bytes(b"target bytes")
     (folder / "notes.md").write_text(NOTES, encoding="utf-8")
     return folder
+
+
+def python_tool(folder, name, code):
+    """Install a fake tool that runs Python code. Windows gets a .bat, as jadx and apktool use."""
+    folder.mkdir(parents=True, exist_ok=True)
+    script = folder / f"{name}_fake.py"
+    script.write_text(code, encoding="utf-8")
+    if os.name == "nt":
+        wrapper = folder / f"{name}.bat"
+        wrapper.write_text(f'@"{sys.executable}" "{script}" %*\r\n', encoding="utf-8")
+    else:
+        wrapper = folder / name
+        wrapper.write_text(
+            f'#!/bin/sh\nexec "{sys.executable}" "{script}" "$@"\n', encoding="utf-8"
+        )
+        wrapper.chmod(0o755)
+    return wrapper
+
+
+def path_with(folder):
+    """The environment with only this folder on PATH, so no real tool can answer."""
+    keep = {key: value for key, value in os.environ.items() if key != "GHIDRA_INSTALL_DIR"}
+    return keep | {"PATH": str(folder)}
