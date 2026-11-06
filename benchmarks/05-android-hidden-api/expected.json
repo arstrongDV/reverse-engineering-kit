@@ -14,6 +14,15 @@
     "auth_flow": "POST device_id with an X-App-Key header to /v2/session, read token from the reply, then send it as Authorization: Bearer",
     "app_key": "fn-demo-not-a-real-key"
   },
+  "answer_markers": [
+    "fieldnotes",
+    "lanretni",
+    "/internal/diag",
+    "/v2/session",
+    "/v2/notes/sync",
+    "fn-demo-not-a-real-key",
+    "debug_menu"
+  ],
   "artifacts": [
     "build/fieldnotes.apk"
   ],

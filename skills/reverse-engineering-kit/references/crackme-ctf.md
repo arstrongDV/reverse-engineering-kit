@@ -60,20 +60,20 @@ When a function's arguments matter, watch it at run time in the VM instead of gu
 name or its offset from the image base in `WATCH` at the top of `scripts/frida/compare.js`:
 
 ```
-frida -f ./crackme -l scripts/frida/compare.js -- RK26-XOR7-ROL3-A
-check_serial(0xffffc13b7da9 "RK26-XOR7-ROL3-A", ...) = 0x1
+frida -f ./challenge -l scripts/frida/compare.js -- 'flag{w4rm_up}'
+check_flag(0xffffc13b7da9 "flag{w4rm_up}", ...) = 0x1
 ```
 
 A finding moves through the ledger like any other. The claim is the answer, and the check is a
 script that runs the unmodified program, inside the VM, on the answer and on inputs that must
-fail. Save it as `tests/check_serial.py` in the work directory:
+fail. Save it as `tests/check_flag.py` in the work directory:
 
 ```python
 import subprocess
 import sys
 
-TARGET = "original/crackme"
-CASES = {"RK26-XOR7-ROL3-A": True, "RK26-XOR7-ROL3-B": False, "short": False}
+TARGET = "original/challenge"
+CASES = {"flag{w4rm_up}": True, "flag{w4rm_uq}": False, "short": False}
 
 
 def accepted(answer):
@@ -89,7 +89,7 @@ sys.exit(1 if failures else 0)
 ```
 
 Then let the ledger run it, inside the VM as well:
-`python scripts/ledger.py verify F-003 --kind function --by tests/check_serial.py`. It confirms
+`python scripts/ledger.py verify F-003 --kind function --by tests/check_flag.py`. It confirms
 the finding only when all three cases print `PASS`, and stores them with the script's SHA-256.
 For a check of a different shape, start from [templates/check.py](../templates/check.py).
 

@@ -5,11 +5,13 @@ import re
 import struct
 import subprocess
 import sys
+import zipfile
 import zlib
 
 import pytest
-from conftest import REPO_ROOT
+from conftest import REPO_ROOT, SKILL_DIR
 
+from build_zip import build
 from triage import FAMILY_OF, triage_target
 
 BENCHMARKS = REPO_ROOT / "benchmarks"
@@ -41,6 +43,7 @@ def test_every_benchmark_is_fully_defined(path):
     assert entry["status"] == "built"
     assert entry["expected"]
     assert entry["artifacts"]
+    assert entry["answer_markers"]
     assert entry["triage"]["type"] in FAMILY_OF
     assert entry["triage"]["family"] == FAMILY_OF[entry["triage"]["type"]]
 
@@ -49,6 +52,33 @@ def test_every_benchmark_is_fully_defined(path):
 def test_every_benchmark_has_source(path):
     files = [item for item in (path.parent / "src").rglob("*") if item.is_file()]
     assert [item for item in files if item.name != ".gitkeep"]
+
+
+@pytest.mark.parametrize("path", ENTRIES, ids=lambda path: path.parent.name)
+def test_every_answer_marker_comes_from_the_answer_or_the_source(path):
+    entry = json.loads(path.read_text("utf-8"))
+    sources = [item for item in (path.parent / "src").rglob("*") if item.is_file()]
+    known = json.dumps(entry["expected"]) + "".join(
+        item.read_text("utf-8", errors="replace") for item in sources
+    )
+    unknown = [marker for marker in entry["answer_markers"] if marker.lower() not in known.lower()]
+    assert unknown == []
+
+
+def test_no_benchmark_answer_reaches_the_copy_that_benchmark_runs_load(tmp_path):
+    """The worked examples quote the answers, so a run that could read them would not be blind."""
+    output = tmp_path / "blind.zip"
+    build(SKILL_DIR, output, blind=True)
+    with zipfile.ZipFile(output) as archive:
+        text = "\n".join(archive.read(name).decode("utf-8") for name in archive.namelist())
+    leaks = [
+        (path.parent.name, marker)
+        for path in ENTRIES
+        for marker in json.loads(path.read_text("utf-8"))["answer_markers"]
+        if marker.lower() in text.lower()
+    ]
+    assert leaks == []
+    assert re.findall(r"benchmark \d+", text, re.IGNORECASE) == []
 
 
 def test_no_built_target_is_tracked_by_git():

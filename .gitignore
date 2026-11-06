@@ -1,5 +1,7 @@
 # Analysis output: targets and dumps never belong in the repo
 re-work/
+# Kept benchmark runs: the agent's own notes, findings, checks and report, never its tool output
+!benchmarks/runs/**/re-work/
 
 # Build output
 dist/

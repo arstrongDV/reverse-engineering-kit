@@ -13,6 +13,18 @@ metadata:
 **Status: pre-release.** Every script and reference is written; the blind benchmark runs come
 next. Keep this file under 500 lines; deep detail belongs in `references/`.
 
+## Required in every analysis
+
+However small the task, these four steps are part of the result, not paperwork around it. They
+are what lets the user trust an answer without redoing the work.
+
+1. Record the answers under `## Authorization` in `notes.md` before anything else (section 1).
+2. Record every answer the user asked for as a finding in the ledger (section 5).
+3. When an answer can be checked, write the check in `tests/` and let `ledger.py verify` run it
+   (section 6). Trying the answer by hand convinces you; only verify puts the proof on record.
+4. Finish with `make_report.py` (section 7). Your reply summarizes `REPORT.md`; it does not
+   replace it.
+
 ## 1. Safety gate
 
 Before any work, establish what the target is, who owns it, what permits the analysis and what
@@ -33,8 +45,9 @@ Full policy: [references/legal-safety.md](references/legal-safety.md).
 1. Run `python scripts/doctor.py --for <goal>`, where the goal is `native`, `android`, `js`,
    `protocols` or `dynamic`, or leave `--for` out to check everything. Exit code 2 means a tool is
    missing or cannot work. Show the user its hint and let them install it: doctor installs nothing.
-2. Create the work directory, copy the target into `original/`, record its SHA-256, and start
-   `notes.md` from [templates/notes.md](templates/notes.md):
+2. Create the work directory, copy the target into `original/` and keep nothing else there:
+   `make_report.py` records the SHA-256 of every file in it. Start `notes.md` from
+   [templates/notes.md](templates/notes.md):
 
 ```
 re-work/<target-name>/
@@ -127,7 +140,7 @@ is a Python script you write in `tests/` inside the work directory, starting fro
 `FAIL <case>`, and exits 0 only when every case passed.
 
 ```
-python scripts/ledger.py verify F-012 --kind function --by tests/check_serial.py
+python scripts/ledger.py verify F-012 --kind function --by tests/check_parse_header.py
 python scripts/ledger.py verify F-014 --kind decoder --by tests/check_decoder.py --input captures/fresh.pcapng
 ```
 

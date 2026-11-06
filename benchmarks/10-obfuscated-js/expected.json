@@ -13,6 +13,12 @@
     ],
     "output_when_run": "{\"user\":\"demo\",\"count\":2,\"first\":\"boot\",\"signature\":\"4c4-f067\",\"target\":\"https://telemetry.example/collect\"}"
   },
+  "answer_markers": [
+    "telemetry.example",
+    "rekit-benchmark",
+    "65521",
+    "4c4-f067"
+  ],
   "artifacts": [
     "build/app.obfuscated.js"
   ],

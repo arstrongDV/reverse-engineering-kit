@@ -7,13 +7,21 @@ import zipfile
 import pytest
 from conftest import SKILL_DIR
 
-from build_zip import PackageError, build
+from build_zip import WORKED_EXAMPLE, PackageError, build, without_worked_examples
 
 
 @pytest.fixture
 def archive(tmp_path):
     output = tmp_path / "skill.zip"
     build(SKILL_DIR, output)
+    with zipfile.ZipFile(output) as opened:
+        yield opened
+
+
+@pytest.fixture
+def blind(tmp_path):
+    output = tmp_path / "blind.zip"
+    build(SKILL_DIR, output, blind=True)
     with zipfile.ZipFile(output) as opened:
         yield opened
 
@@ -77,3 +85,27 @@ def test_symlinks_are_rejected(tmp_path):
     (skill / "link.md").symlink_to(skill / "SKILL.md")
     with pytest.raises(PackageError, match="symlink"):
         build(skill, tmp_path / "demo.zip")
+
+
+def test_the_blind_copy_leaves_out_only_the_examples(archive, blind):
+    native = f"{SKILL_DIR.name}/references/native.md"
+    assert WORKED_EXAMPLE in archive.read(native).decode("utf-8")
+    assert WORKED_EXAMPLE not in blind.read(native).decode("utf-8")
+    shipped = [name for name in archive.namelist() if "/examples/" not in name]
+    assert len(shipped) < len(archive.namelist())
+    assert blind.namelist() == shipped
+    assert mode_of(blind, f"{SKILL_DIR.name}/scripts/doctor.py") == mode_of(
+        archive, f"{SKILL_DIR.name}/scripts/doctor.py"
+    )
+
+
+def test_the_blind_copy_drops_whole_sections_and_links_to_examples():
+    text = (
+        "# Title\n\n## Steps\n\nKeep this.\n\n```\n## Worked example\n```\n\n"
+        "## Worked example\n\nDrop this.\n\n```\n## Steps\n```\n\nAnd this.\n\n"
+        "## Authorization\n\nKeep this too.\n\nWorked examples: [a](examples/a.md).\n"
+    )
+    assert without_worked_examples(text) == (
+        "# Title\n\n## Steps\n\nKeep this.\n\n```\n## Worked example\n```\n\n"
+        "## Authorization\n\nKeep this too.\n"
+    )

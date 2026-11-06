@@ -42,8 +42,8 @@ python scripts/run_ghidra.py decompiled/libx.so # any other file, such as an unp
 5. Ask for more. Later runs reuse the analysis, so each takes a few seconds:
 
 ```
-python scripts/run_ghidra.py --function check_serial --function FUN_00401a20
-python scripts/run_ghidra.py --bytes KEY:4 --bytes 00403000:64
+python scripts/run_ghidra.py --function parse_header --function FUN_00401a20
+python scripts/run_ghidra.py --bytes LOOKUP:16 --bytes 00403000:64
 ```
 
    `--function` takes a name or an address. `--bytes` reads data at a symbol or address, which is
@@ -73,8 +73,8 @@ For a quick look without a full analysis, or to check one of Ghidra's claims:
 
 ```
 rizin -e scr.color=0 -qc 'aa; afl' original/<file>                   # list functions
-rizin -e scr.color=0 -qc 'aa; pdf @ sym.check_serial' original/<file> # disassemble one
-rizin -e scr.color=0 -qc 'px 16 @ obj.EXPECTED' original/<file>      # bytes at a symbol
+rizin -e scr.color=0 -qc 'aa; pdf @ sym.parse_header' original/<file> # disassemble one
+rizin -e scr.color=0 -qc 'px 16 @ obj.LOOKUP' original/<file>        # bytes at a symbol
 ```
 
 rizin loads a PIE binary at address 0, where Ghidra uses `00100000`, so the same byte has two

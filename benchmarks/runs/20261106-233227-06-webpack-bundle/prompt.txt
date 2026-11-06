@@ -1,0 +1,6 @@
+Reverse engineer main.js in this folder. What I need: module map and recovered API client.
+
+I wrote these files myself as test targets, so you are authorized to analyze them and to run them.
+You are in a disposable arm64 Ubuntu VM with no internet access, and the analysis tools are
+installed. Use the reverse-engineering-kit skill. I cannot answer questions during this run, so
+make reasonable assumptions, note them, and finish with the report.

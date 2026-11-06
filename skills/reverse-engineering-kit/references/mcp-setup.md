@@ -22,8 +22,9 @@ answer matters, record it in the ledger with the tool and arguments as its evide
 | r2mcp 1.9.0 | radare2 6.2.4 | Yes, on 2026-11-05 | Opens any file in its sandbox folder |
 | ida-pro-mcp | IDA Pro | No: IDA is a paid product | Follow its own README |
 
-The tests ran on the project's arm64 Ubuntu 26.04 VM, on benchmark 1, through the MCP Python SDK
-client over stdio, which is how Claude Code, Codex CLI and Cursor start a local server.
+The tests ran on the project's arm64 Ubuntu 26.04 VM, on a small crackme the project built,
+through the MCP Python SDK client over stdio, which is how Claude Code, Codex CLI and Cursor start
+a local server.
 `tools/vm/vm.sh check-mcp` in the repository repeats them.
 
 The safety rules do not change:

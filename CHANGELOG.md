@@ -47,6 +47,12 @@ All notable changes to this project are documented here. The format follows
   and dated session log entries in the `notes.md` template.
 - `references/mcp-setup.md`, with GhidraMCP 2.0 headless and r2mcp 1.9.0 setups tested in the
   VM, and `vm.sh check-mcp`, which repeats those tests.
+- `build_zip.py --blind` builds the copy of the skill that benchmark runs load: the release zip
+  without the worked examples, which quote the benchmark answers. Each `expected.json` lists
+  `answer_markers`, and tests check that none of them reaches that copy or any prompt.
+- `vm.sh install-agent` and `vm.sh run-benchmark`, which run Claude Code on one benchmark in the
+  VM as a user without `sudo`, with only Anthropic's API reachable and the web tools turned off,
+  and `tools/score_run.py`, which summarizes a run for scoring.
 
 ### Changed
 
@@ -62,3 +68,15 @@ All notable changes to this project are documented here. The format follows
   `--kind`. The finding stores the result and the SHA-256 of the check and its inputs, and
   `make_report.py` refuses a confirmed finding whose check or input has changed. Before, `--by`
   accepted any text without running anything.
+- The skill's generic examples use made-up names such as `check_flag` and `parse_header`
+  instead of benchmark 1's, and no longer name a benchmark outside the worked examples.
+- `SKILL.md` says which steps every analysis needs, however small: the authorization record,
+  a finding for each answer, `verify` for each answer that can be checked, and `make_report.py`.
+  The first run of benchmark 1 found the right answer but skipped all four.
+
+### Fixed
+
+- `make_report.py` wrote "a algorithm check" and "a endpoint check".
+- `SKILL.md` asked for the target's SHA-256 to be recorded without saying where, so an agent saved
+  it as a file in `original/`, which the report then hashed as a second target. It now says to
+  keep nothing else there, since `make_report.py` records the hashes.

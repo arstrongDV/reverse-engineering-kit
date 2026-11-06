@@ -11,9 +11,9 @@ so a new session starts from them.
 ## Hypotheses
 
 <!-- One line each, numbered as findings refer to them, with the state it is in:
-- H1: the serial check is a XOR with a fixed key. Open.
-- H2: the length must be 16. Supported by F-003.
-- H3: the key comes from the network. Disproved by F-005.
+- H1: the settings blob is zlib-compressed JSON. Open.
+- H2: the first two header bytes are a format version. Supported by F-003.
+- H3: the cache file is encrypted. Disproved by F-005.
 -->
 
 ## Summary
@@ -28,7 +28,7 @@ so a new session starts from them.
 
 <!-- One entry per session, newest last, under a ### heading with the date:
 ### 2026-11-05
-- Did: decompiled check_serial, read KEY and EXPECTED with --bytes.
+- Did: decompiled parse_header, read its LOOKUP table with --bytes.
 - Showed: F-002 and F-003 inferred; H1 still open.
-- Next: write tests/check_serial.py and verify F-002 as a function.
+- Next: write tests/check_parse_header.py and verify F-002 as a function.
 -->

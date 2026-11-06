@@ -25,12 +25,24 @@ only in the VM.
 
 ## Running a benchmark
 
-An agent must only see the built target. `src/` and `expected.json` contain the answers, so copy
-the target into an empty directory outside this repo and run the agent there.
+An agent must only see the built target. `src/` and `expected.json` contain the answers, and so do
+the skill's worked examples, which describe these benchmarks. `tools/vm/vm.sh run-benchmark <n>`
+runs Claude Code in the VM with only the built target, a prompt that names the deliverable, and
+the blind copy of the skill, which leaves the worked examples out. See
+[tools/vm/README.md](../tools/vm/README.md#benchmark-runs) for the setup and what keeps a run
+blind.
+
+Each `expected.json` lists `answer_markers`: strings from the answer that only a solved run would
+know. Tests check that none of them appears in the blind copy or in any prompt.
 
 ## Scoring
 
 - **Pass or fail:** the run's output matches `expected.json`.
 - **False confirmations:** count findings marked `confirmed` that are actually wrong. The goal is 0.
+
+`python3 tools/score_run.py dist/runs/<run>` gathers what the judgment needs: how the run ended,
+whether the skill was loaded, each finding with its confidence, the check behind each confirmed
+one, and which answer markers the agent stated in its own report, notes and findings. Pass or fail
+is still judged against `expected.json`, because the answers are free text.
 
 Record every run in [RESULTS.md](RESULTS.md). The release bar is at least 8 of 10 solved.

@@ -9,6 +9,11 @@
     "key": "5a c3 17 9e",
     "function": "check_serial"
   },
+  "answer_markers": [
+    "RK26-XOR7-ROL3-A",
+    "5a c3 17 9e",
+    "check_serial"
+  ],
   "artifacts": [
     "build/crackme"
   ],
