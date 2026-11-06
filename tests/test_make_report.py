@@ -35,7 +35,7 @@ def test_five_findings_become_a_clean_report(work):
     assert hashlib.sha256(b"target bytes").hexdigest() in text
     assert "Own crackme, built for this test" in text
     assert "F-002" in body_of(text, "Confirmed findings")
-    verified = "Verified by: tests/test_key.py, a algorithm check: 3 cases passed, none failed"
+    verified = "Verified by: tests/test_key.py, an algorithm check: 3 cases passed, none failed"
     assert verified in body_of(text, "Confirmed findings")
     assert "F-003" in body_of(text, "Observed findings")
     assert "F-001" in body_of(text, "Inferred findings")

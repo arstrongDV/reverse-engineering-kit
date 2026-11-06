@@ -11,9 +11,9 @@ so a new session starts from them.
 ## Hypotheses
 
 <!-- One line each, numbered as findings refer to them, with the state it is in:
-- H1: the serial check is a XOR with a fixed key. Open.
-- H2: the length must be 16. Supported by F-003.
-- H3: the key comes from the network. Disproved by F-005.
+- H1: the settings blob is zlib-compressed JSON. Open.
+- H2: the first two header bytes are a format version. Supported by F-003.
+- H3: the cache file is encrypted. Disproved by F-005.
 -->
 
 ## Summary

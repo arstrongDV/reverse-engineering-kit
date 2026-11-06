@@ -5,6 +5,9 @@ Pass or fail stays a judgment, recorded in benchmarks/RESULTS.md: free-text answ
 matched mechanically. This gathers what the judgment needs: how the run ended, whether the skill
 was loaded, every finding with its confidence, the check behind each confirmed one, and which
 answer markers the agent itself stated in its report, notes or findings, not in tool output.
+
+With --save, it also keeps the run's evidence in benchmarks/runs/<run>/: the transcript, the prompt
+and the text the agent wrote, without tool output or copies of the target.
 """
 
 from __future__ import annotations
@@ -17,8 +20,14 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BENCHMARKS = REPO_ROOT / "benchmarks"
+KEPT_RUNS = BENCHMARKS / "runs"
 SKILL = "reverse-engineering-kit"
 STATED = ("REPORT.md", "notes.md", "findings.jsonl")
+RUN_FILES = ("transcript.jsonl", "prompt.txt", "exit-code")
+# Tool output and copies of the target are large, and the target is a built file.
+NOT_KEPT = {"decompiled", "original"}
+MAX_KEPT_FILE = 1_000_000
+CREDENTIAL = re.compile(r"sk-ant-[A-Za-z0-9_-]{8,}")
 
 
 class ScoreError(Exception):
@@ -137,12 +146,53 @@ def confirmed(finding: dict) -> dict:
     }
 
 
+def evidence(run: Path) -> list[Path]:
+    """The files worth keeping: the run's own, and the text files in each work directory."""
+    kept = [run / name for name in RUN_FILES if (run / name).is_file()]
+    for work in work_dirs(run):
+        for path in sorted(work.rglob("*")):
+            parts = path.relative_to(work).parts
+            if path.is_file() and not NOT_KEPT.intersection(parts) and is_text(path):
+                kept.append(path)
+    return kept
+
+
+def is_text(path: Path) -> bool:
+    data = path.read_bytes()
+    if len(data) > MAX_KEPT_FILE or b"\0" in data:
+        return False
+    try:
+        data.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    return True
+
+
+def save(run: Path, destination: Path) -> list[Path]:
+    files = evidence(run)
+    leaked = [path for path in files if CREDENTIAL.search(path.read_text("utf-8"))]
+    if leaked:
+        names = ", ".join(str(path.relative_to(run)) for path in leaked)
+        raise ScoreError(f"refusing to keep files that hold a credential: {names}")
+    target = destination / run.name
+    for path in files:
+        copy = target / path.relative_to(run)
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        copy.write_bytes(path.read_bytes())
+    return [target / path.relative_to(run) for path in files]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("run", type=Path, help="a folder in dist/runs/")
+    parser.add_argument("--save", action="store_true", help="keep the evidence in the repo")
     args = parser.parse_args()
     try:
         summary = summarize(args.run.resolve())
+        if args.save:
+            summary["saved"] = [
+                str(path.relative_to(REPO_ROOT)) for path in save(args.run.resolve(), KEPT_RUNS)
+            ]
     except ScoreError as error:
         print(f"score_run: {error}", file=sys.stderr)
         return 1

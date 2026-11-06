@@ -6,7 +6,7 @@ import pytest
 from conftest import REPO_ROOT
 
 from bench_task import TaskError, benchmark_dir, prompt_for, stage
-from score_run import ScoreError, summarize
+from score_run import ScoreError, save, summarize
 
 ENTRIES = sorted((REPO_ROOT / "benchmarks").glob("*/expected.json"))
 
@@ -120,6 +120,31 @@ def test_a_work_directory_without_a_ledger_still_counts(run):
     [summary] = summarize(run)["work_dirs"]
     assert (summary["ledger"], summary["report"]) == (False, False)
     assert summary["confidence"] == {}
+
+
+def test_saving_keeps_the_agents_text_but_not_tool_output_or_the_target(run, tmp_path):
+    work = run / "bench" / "task" / "re-work" / "crackme"
+    (work / "original").mkdir()
+    (work / "original" / "crackme").write_bytes(b"\x7fELF\0")
+    (work / "tests").mkdir()
+    (work / "tests" / "check.py").write_text("print('PASS a')")
+    saved = save(run, tmp_path / "kept")
+    names = sorted(str(path.relative_to(tmp_path / "kept" / run.name)) for path in saved)
+    assert names == [
+        "bench/task/re-work/crackme/REPORT.md",
+        "bench/task/re-work/crackme/findings.jsonl",
+        "bench/task/re-work/crackme/tests/check.py",
+        "exit-code",
+        "transcript.jsonl",
+    ]
+
+
+def test_saving_refuses_a_run_that_holds_a_credential(run, tmp_path):
+    work = run / "bench" / "task" / "re-work" / "crackme"
+    (work / "notes.md").write_text("token: sk-ant-oat01-abcdefghijklmnop")
+    with pytest.raises(ScoreError, match="notes.md"):
+        save(run, tmp_path / "kept")
+    assert not (tmp_path / "kept").exists()
 
 
 def test_a_run_without_a_benchmark_name_is_refused(tmp_path):

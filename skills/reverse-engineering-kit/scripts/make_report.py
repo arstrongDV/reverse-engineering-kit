@@ -53,7 +53,8 @@ def render_finding(finding: dict) -> str:
     ]
     record = finding["verification"]
     if record:
-        verified = f"{one_line(record['check'])}, a {record['kind']} check: "
+        article = "an" if record["kind"][0] in "aeiou" else "a"
+        verified = f"{one_line(record['check'])}, {article} {record['kind']} check: "
         verified += f"{record['passed']} cases passed, none failed"
         if record["inputs"]:
             verified += f", on {', '.join(one_line(item['path']) for item in record['inputs'])}"

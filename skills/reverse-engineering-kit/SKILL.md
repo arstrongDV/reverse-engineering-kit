@@ -45,8 +45,9 @@ Full policy: [references/legal-safety.md](references/legal-safety.md).
 1. Run `python scripts/doctor.py --for <goal>`, where the goal is `native`, `android`, `js`,
    `protocols` or `dynamic`, or leave `--for` out to check everything. Exit code 2 means a tool is
    missing or cannot work. Show the user its hint and let them install it: doctor installs nothing.
-2. Create the work directory, copy the target into `original/`, record its SHA-256, and start
-   `notes.md` from [templates/notes.md](templates/notes.md):
+2. Create the work directory, copy the target into `original/` and keep nothing else there:
+   `make_report.py` records the SHA-256 of every file in it. Start `notes.md` from
+   [templates/notes.md](templates/notes.md):
 
 ```
 re-work/<target-name>/

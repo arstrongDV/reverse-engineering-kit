@@ -73,3 +73,10 @@ All notable changes to this project are documented here. The format follows
 - `SKILL.md` says which steps every analysis needs, however small: the authorization record,
   a finding for each answer, `verify` for each answer that can be checked, and `make_report.py`.
   The first run of benchmark 1 found the right answer but skipped all four.
+
+### Fixed
+
+- `make_report.py` wrote "a algorithm check" and "a endpoint check".
+- `SKILL.md` asked for the target's SHA-256 to be recorded without saying where, so an agent saved
+  it as a file in `original/`, which the report then hashed as a second target. It now says to
+  keep nothing else there, since `make_report.py` records the hashes.
