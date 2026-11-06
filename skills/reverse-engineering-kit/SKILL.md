@@ -13,6 +13,18 @@ metadata:
 **Status: pre-release.** Every script and reference is written; the blind benchmark runs come
 next. Keep this file under 500 lines; deep detail belongs in `references/`.
 
+## Required in every analysis
+
+However small the task, these four steps are part of the result, not paperwork around it. They
+are what lets the user trust an answer without redoing the work.
+
+1. Record the answers under `## Authorization` in `notes.md` before anything else (section 1).
+2. Record every answer the user asked for as a finding in the ledger (section 5).
+3. When an answer can be checked, write the check in `tests/` and let `ledger.py verify` run it
+   (section 6). Trying the answer by hand convinces you; only verify puts the proof on record.
+4. Finish with `make_report.py` (section 7). Your reply summarizes `REPORT.md`; it does not
+   replace it.
+
 ## 1. Safety gate
 
 Before any work, establish what the target is, who owns it, what permits the analysis and what

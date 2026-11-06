@@ -70,3 +70,6 @@ All notable changes to this project are documented here. The format follows
   accepted any text without running anything.
 - The skill's generic examples use made-up names such as `check_flag` and `parse_header`
   instead of benchmark 1's, and no longer name a benchmark outside the worked examples.
+- `SKILL.md` says which steps every analysis needs, however small: the authorization record,
+  a finding for each answer, `verify` for each answer that can be checked, and `make_report.py`.
+  The first run of benchmark 1 found the right answer but skipped all four.
