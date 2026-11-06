@@ -25,6 +25,15 @@
     },
     "bridge": "window.notes, exposed in preload.js"
   },
+  "answer_markers": [
+    "notes:list",
+    "notes:save",
+    "notes:delete",
+    "app:version",
+    "window:minimize",
+    "window.notes",
+    "rekit-benchmark-notes"
+  ],
   "artifacts": [
     "build/resources/app.asar"
   ],

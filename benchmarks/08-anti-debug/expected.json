@@ -12,6 +12,10 @@
     "message": "The launch code is ORCHID-42",
     "message_key": "0x2a"
   },
+  "answer_markers": [
+    "ORCHID-42",
+    "launch code"
+  ],
   "artifacts": [
     "build/antidebug"
   ],

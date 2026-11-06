@@ -2,6 +2,7 @@
   "id": 4,
   "target": "Toy TCP protocol and 2 pcap files",
   "deliverable": "Message dictionary and a working decoder",
+  "prompt_note": "Analyze only session-analysis.pcap. Keep session-holdout.pcap back to test your decoder.",
   "status": "built",
   "expected": {
     "port": 7500,
@@ -25,6 +26,11 @@
     },
     "check": "the decoder must parse session-holdout.pcap, which was not used during analysis, including split and shared TCP segments"
   },
+  "answer_markers": [
+    "0xB17E",
+    "7500",
+    "XOR 0x5C"
+  ],
   "artifacts": [
     "build/session-analysis.pcap",
     "build/session-holdout.pcap"

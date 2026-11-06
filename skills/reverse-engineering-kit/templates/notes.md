@@ -28,7 +28,7 @@ so a new session starts from them.
 
 <!-- One entry per session, newest last, under a ### heading with the date:
 ### 2026-11-05
-- Did: decompiled check_serial, read KEY and EXPECTED with --bytes.
+- Did: decompiled parse_header, read its LOOKUP table with --bytes.
 - Showed: F-002 and F-003 inferred; H1 still open.
-- Next: write tests/check_serial.py and verify F-002 as a function.
+- Next: write tests/check_parse_header.py and verify F-002 as a function.
 -->

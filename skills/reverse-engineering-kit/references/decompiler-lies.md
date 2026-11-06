@@ -27,7 +27,7 @@ right about control flow and often wrong about types, names and arithmetic idiom
 3. Check each line one of these ways, from cheapest to most certain:
    - Look for a known idiom in the table below.
    - Read the disassembly at the same address, for example
-     `rizin -e scr.color=0 -qc 'aa; pdf @ sym.check_serial' original/crackme`.
+     `rizin -e scr.color=0 -qc 'aa; pdf @ sym.parse_header' original/target`.
    - Reimplement the lines in Python and compare with the program on real inputs, inside a VM.
 4. Record what you verified and how. The ledger's `evidence` field is the place for it.
 

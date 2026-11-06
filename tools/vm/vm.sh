@@ -8,6 +8,14 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE="$HERE/$VM.yaml"
 BENCHMARKS="$HERE/../../benchmarks"
 GUEST_BENCHMARKS=/var/tmp/benchmarks
+DIST="$HERE/../../dist"
+AGENT_SNAPSHOT=agent
+# Claude Code and Ghidra together need more than the 2 GiB the other snapshots run with.
+AGENT_MEMORY=3
+TOKEN_FILE="${RE_KIT_TOKEN_FILE:-$HOME/.config/re-kit/claude-token}"
+RUN_TIMEOUT="${RE_KIT_RUN_TIMEOUT:-3600}"
+RUN_MAX_TURNS="${RE_KIT_RUN_MAX_TURNS:-300}"
+RUN_MODEL="${RE_KIT_RUN_MODEL:-}"
 
 usage() {
   cat <<EOF
@@ -22,6 +30,8 @@ usage: vm.sh <command>
   check-tools        prove each installed tool works, with the network still blocked
   build-benchmarks   build the benchmark targets in the VM and copy them to benchmarks/*/build
   check-mcp          install GhidraMCP and r2mcp, then test both offline on benchmark 1
+  install-agent      install Claude Code for benchmark runs, then block the network again
+  run-benchmark <n>  run Claude Code with the blind skill on benchmark n; output in dist/runs/
   status             show the VM state and network mode
   snapshot <name>    stop the VM and save a copy-on-write snapshot, replacing one of that name
   restore <name>     replace the VM with a snapshot and start it
@@ -36,6 +46,60 @@ running() { [[ "$(limactl list --format '{{.Status}}' "$VM" 2>/dev/null)" == Run
 stop_vm() { if running; then limactl stop "$VM"; fi; }
 
 guest() { limactl shell --workdir / "$VM" "$@"; }
+
+restore_snapshot() {
+  if ! exists "$SNAPSHOT_PREFIX$1"; then
+    echo "vm.sh: no snapshot named $1" >&2
+    exit 1
+  fi
+  stop_vm
+  limactl delete "$VM"
+  limactl clone --tty=false "$SNAPSHOT_PREFIX$1" "$VM"
+  if [[ -n "${2:-}" ]]; then
+    limactl edit --tty=false --memory "$2" "$VM"
+  fi
+  limactl start --tty=false "$VM"
+}
+
+run_benchmark() {
+  if [[ ! -f "$TOKEN_FILE" ]]; then
+    echo "vm.sh: no token in $TOKEN_FILE; see tools/vm/README.md" >&2
+    exit 1
+  fi
+  if [[ "$(stat -f %Lp "$TOKEN_FILE")" != 600 ]]; then
+    echo "vm.sh: $TOKEN_FILE must be readable by you alone: chmod 600 it" >&2
+    exit 1
+  fi
+  stage="$(mktemp -d)"
+  trap 'rm -rf "$stage"' EXIT
+  local name address out
+  name="$(python3 "$HERE/../bench_task.py" "$1" "$stage")"
+  python3 "$HERE/../build_zip.py" --blind >/dev/null
+  address="$(python3 -c 'import socket; print(socket.gethostbyname("api.anthropic.com"))')"
+  restore_snapshot "$AGENT_SNAPSHOT" "$AGENT_MEMORY"
+  guest sh -c 'rm -rf /var/tmp/run && mkdir -m 755 /var/tmp/run'
+  limactl copy "$HERE/run-agent.sh" "$VM:/var/tmp/run/run-agent.sh"
+  limactl copy "$DIST/reverse-engineering-kit-blind.zip" "$VM:/var/tmp/run/skill.zip"
+  limactl copy --recursive "$stage/task" "$VM:/var/tmp/run/task"
+  limactl copy "$stage/prompt.txt" "$VM:/var/tmp/run/prompt.txt"
+  echo "$address" | guest sh -c 'cat >/var/tmp/run/api-address'
+  # Through stdin, so the token never appears in a command line.
+  guest sh -c 'umask 077 && cat >/var/tmp/run/token' <"$TOKEN_FILE"
+  caffeinate -i limactl shell --workdir / "$VM" \
+    sudo bash /var/tmp/run/run-agent.sh "$RUN_TIMEOUT" "$RUN_MAX_TURNS" "$RUN_MODEL"
+  out="$DIST/runs/$(date +%Y%m%d-%H%M%S)-$name"
+  mkdir -p "$out"
+  limactl copy "$VM:/var/tmp/run/out.tar" "$out/out.tar"
+  tar -C "$out" -xf "$out/out.tar"
+  rm -f "$out/out.tar"
+  stop_vm
+  if grep -q '"authentication_failed"' "$out/transcript.jsonl"; then
+    rm -rf "$out"
+    echo "vm.sh: Claude Code rejected the token in $TOKEN_FILE; save it again (tools/vm/README.md)" >&2
+    exit 1
+  fi
+  echo "$out"
+}
 
 require_name() {
   if [[ -z "${1:-}" ]]; then
@@ -114,6 +178,17 @@ case "${1:-}" in
     guest sudo systemctl start nftables
     guest bash /tmp/check-mcp.sh --check
     ;;
+  install-agent)
+    # A failed install must not leave the VM online.
+    trap 'guest sudo systemctl start nftables' EXIT
+    limactl copy "$HERE/install-agent.sh" "$VM:/tmp/install-agent.sh"
+    guest sudo systemctl stop nftables
+    caffeinate -i limactl shell --workdir / "$VM" bash /tmp/install-agent.sh
+    ;;
+  run-benchmark)
+    require_name "${2:-}"
+    run_benchmark "$2"
+    ;;
   status)
     limactl list "$VM"
     if running; then
@@ -134,14 +209,7 @@ case "${1:-}" in
     ;;
   restore)
     require_name "${2:-}"
-    if ! exists "$SNAPSHOT_PREFIX$2"; then
-      echo "vm.sh: no snapshot named $2" >&2
-      exit 1
-    fi
-    stop_vm
-    limactl delete "$VM"
-    limactl clone --tty=false "$SNAPSHOT_PREFIX$2" "$VM"
-    limactl start --tty=false "$VM"
+    restore_snapshot "$2"
     ;;
   snapshots)
     limactl list --quiet | sed -n "s/^$SNAPSHOT_PREFIX//p"

@@ -127,7 +127,7 @@ is a Python script you write in `tests/` inside the work directory, starting fro
 `FAIL <case>`, and exits 0 only when every case passed.
 
 ```
-python scripts/ledger.py verify F-012 --kind function --by tests/check_serial.py
+python scripts/ledger.py verify F-012 --kind function --by tests/check_parse_header.py
 python scripts/ledger.py verify F-014 --kind decoder --by tests/check_decoder.py --input captures/fresh.pcapng
 ```
 

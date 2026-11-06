@@ -26,6 +26,7 @@ tools/vm/vm.sh shell                                # or: vm.sh shell <command>
 tools/vm/vm.sh check-tools                          # prove each tool works, offline
 tools/vm/vm.sh build-benchmarks                     # see benchmarks/README.md
 tools/vm/vm.sh check-mcp                            # test the MCP setups; needs benchmark 1 built
+tools/vm/vm.sh run-benchmark 1                      # see "Benchmark runs" below
 tools/vm/vm.sh restore tools                        # throw away everything since the snapshot
 tools/vm/vm.sh down
 ```
@@ -75,6 +76,51 @@ blocked again, [mcp_check.py](mcp_check.py) drives each server over stdio on ben
 compares its answers with `run_ghidra.py`'s. It takes about a minute, and uses about 400 MB.
 
 The servers are not part of the `tools` snapshot. Run `vm.sh restore tools` afterwards.
+
+## Benchmark runs
+
+`vm.sh run-benchmark <n>` runs Claude Code on one benchmark with the skill installed, and copies
+everything the run produced to `dist/runs/<date>-<benchmark>/`. Set it up once:
+
+```sh
+tools/vm/vm.sh restore tools
+tools/vm/vm.sh install-agent      # Claude Code 2.1.296 from npm, and the user it runs as
+tools/vm/vm.sh snapshot agent
+mkdir -p ~/.config/re-kit
+claude setup-token                # copy the whole token it prints, which starts with sk-ant-oat01-
+(umask 077; pbpaste | tr -d '[:space:]' >~/.config/re-kit/claude-token; echo >>~/.config/re-kit/claude-token)
+pbcopy </dev/null                 # empties the clipboard again
+```
+
+The token is longer than a terminal line, and copying a wrapped line can copy the wrap as a line
+break, so the third line saves the clipboard with every space and line break removed. An Anthropic
+API key works in the same file. Then, with the lid open:
+
+```sh
+tools/vm/vm.sh run-benchmark 1
+python3 tools/score_run.py dist/runs/<date>-01-crackme-xor
+```
+
+Each run starts from the `agent` snapshot with 3 GiB of RAM, and stops the VM when it ends.
+`RE_KIT_RUN_TIMEOUT` (default 3600 seconds), `RE_KIT_RUN_MAX_TURNS` (300) and `RE_KIT_RUN_MODEL`
+(Claude Code's default) change the limits, and `RE_KIT_TOKEN_FILE` the token's location.
+
+A run is blind only if the agent cannot reach the answers, so [run-agent.sh](run-agent.sh) makes
+sure of each of these, and stops before the agent starts if one fails:
+
+- **The VM holds no sources.** Only the built targets and a prompt from
+  [bench_task.py](../bench_task.py) go in, and the prompt never quotes the answers.
+- **The skill is the blind copy.** `build_zip.py --blind` leaves out the worked examples, because
+  they describe the benchmarks. A test checks that no answer marker from any `expected.json`
+  survives in it.
+- **Only Anthropic's API is reachable.** The firewall opens port 443 to Anthropic's published
+  ranges, and the run checks that GitHub, where the answers are public, stays unreachable.
+  WebSearch runs on Anthropic's side, out of the firewall's reach, so WebSearch and WebFetch are
+  turned off.
+- **The agent cannot undo any of this.** It runs as the user `bench`, which has no `sudo`.
+
+The agent runs with `--permission-mode bypassPermissions`, so it never stops to ask. That is safe
+only because the VM is disposable and restored before every run.
 
 ## What the isolation covers
 

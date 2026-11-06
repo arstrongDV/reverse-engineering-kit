@@ -18,6 +18,10 @@
     "footer": "CRC-32 of everything before it",
     "check": "a Kaitai spec parses all 3 samples"
   },
+  "answer_markers": [
+    "RKF1",
+    ".rkf"
+  ],
   "artifacts": [
     "build/alpha.rkf",
     "build/bravo.rkf",

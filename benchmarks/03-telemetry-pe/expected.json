@@ -32,6 +32,12 @@
     },
     "persistence": "none"
   },
+  "answer_markers": [
+    "ReKitBench",
+    "47800",
+    "RKTL",
+    "IntervalSeconds"
+  ],
   "artifacts": [
     "build/agent.exe"
   ],

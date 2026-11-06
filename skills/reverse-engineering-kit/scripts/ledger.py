@@ -545,7 +545,7 @@ def build_ledger_parser() -> ArgumentParser:
     command.add_argument(
         "--by",
         required=True,
-        help=f"the check: a Python script in {CHECKS}/, such as tests/check_serial.py",
+        help=f"the check: a Python script in {CHECKS}/, such as tests/check_parse_header.py",
     )
     command.add_argument(
         "--kind",

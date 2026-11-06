@@ -3,7 +3,7 @@
 // Run: frida -f ./target -l compare.js -- <arguments>     (Frida 17)
 
 // Functions to watch, by symbol in the main program or by offset from its base, such as
-// ["check_serial"] or ["0x7e8"]. Each call logs its first arguments and its return value.
+// ["parse_header"] or ["0x1a40"]. Each call logs its first arguments and its return value.
 const WATCH = [];
 const MAX_TEXT = 80;
 

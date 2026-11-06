@@ -8,6 +8,9 @@
     "unpack": "upx -d",
     "serial": "RK26-XOR7-ROL3-A"
   },
+  "answer_markers": [
+    "RK26-XOR7-ROL3-A"
+  ],
   "artifacts": [
     "build/crackme-packed"
   ],

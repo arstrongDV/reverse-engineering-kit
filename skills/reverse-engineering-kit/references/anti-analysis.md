@@ -103,8 +103,8 @@ are VMware, and `52:54:00` is QEMU.
   behave differently elsewhere. Say so in the report's gaps.
 - **Dynamic unpacking of an unknown sample.** Running it is running malware until shown
   otherwise. It needs the user's confirmed VM, a snapshot and no network.
-- **Stopping at the first check.** Programs often stack several. Benchmark 8 has two, and a
-  third could be hidden in a timing loop.
+- **Stopping at the first check.** Programs often stack several, and one may hide in a timing
+  loop or a signal handler. Keep reading after the first one you find.
 
 ## Worked example
 
