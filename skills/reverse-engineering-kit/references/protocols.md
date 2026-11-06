@@ -36,8 +36,25 @@ python decoder.py decompiled/session-1.pcap
    It rebuilds each TCP direction in sequence order, cuts frames with the header table you give
    it, and exits 1 at the first frame that does not fit.
 5. Fill in `message-dictionary.md` as you go, with a ledger finding for each field and message.
-6. Finally run the decoder on the capture kept aside. No problems there is the check a decoder
-   needs before `confirmed`.
+6. Finally run the decoder on the capture kept aside, through a check the ledger runs. No
+   problems there is the check a decoder needs before `confirmed`. Save as
+   `tests/check_decoder.py`:
+
+```python
+import subprocess
+import sys
+
+failed = 0
+for capture in sys.argv[1:]:
+    run = subprocess.run([sys.executable, "decoder.py", capture], capture_output=True, text=True)
+    failed += run.returncode != 0
+    print(f"{'PASS' if run.returncode == 0 else 'FAIL'} {capture}: exit {run.returncode}")
+sys.exit(1 if failed else 0)
+```
+
+```
+python scripts/ledger.py verify F-010 --kind decoder --by tests/check_decoder.py --input captures/held-back.pcapng
+```
 
 For a file format, write a Kaitai description instead of a decoder, and check it on every sample:
 
@@ -141,7 +158,8 @@ def check(frame, header):
 It decoded the first capture with no problems. The capture kept aside then also decoded with no
 problems, although in it the client's first message is split across two segments and a response
 shares a segment with the next request: a decoder that read packet by packet would fail there.
-That run is the check that lets the decoder's finding become `confirmed`.
+That run, made by `ledger.py verify --kind decoder` with the capture kept aside as `--input`, is
+the check that lets the decoder's finding become `confirmed`.
 
 Benchmark 9 is a private file format with three samples, which triage could only call `unknown`.
 The 27-byte sample began `52 4b 46 31 02 00 02 00`: the text `RKF1`, then two 16-bit

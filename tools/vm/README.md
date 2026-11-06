@@ -25,6 +25,7 @@ limactl copy ./target re-kit-linux:/tmp/target      # the only way files move in
 tools/vm/vm.sh shell                                # or: vm.sh shell <command>
 tools/vm/vm.sh check-tools                          # prove each tool works, offline
 tools/vm/vm.sh build-benchmarks                     # see benchmarks/README.md
+tools/vm/vm.sh check-mcp                            # test the MCP setups; needs benchmark 1 built
 tools/vm/vm.sh restore tools                        # throw away everything since the snapshot
 tools/vm/vm.sh down
 ```
@@ -63,6 +64,17 @@ tools/vm/vm.sh snapshot tools
 Two tools cannot be installed the usual way on arm64 Linux. Ghidra releases have no arm64 Linux
 decompiler, so the script runs `support/gradle/gradlew buildNatives`; without this Ghidra starts but
 cannot decompile. rizin has no arm64 Linux package or prebuilt binary, so it is built from source.
+
+## MCP servers
+
+`vm.sh check-mcp` tests the setups in
+[references/mcp-setup.md](../../skills/reverse-engineering-kit/references/mcp-setup.md). With the
+network open, [check-mcp.sh](check-mcp.sh) installs GhidraMCP 2.0 with Python 3.13 from uv
+0.13.7, radare2 6.2.4 and r2mcp 1.9.0, checking the SHA-256 of each download. With the network
+blocked again, [mcp_check.py](mcp_check.py) drives each server over stdio on benchmark 1 and
+compares its answers with `run_ghidra.py`'s. It takes about a minute, and uses about 400 MB.
+
+The servers are not part of the `tools` snapshot. Run `vm.sh restore tools` afterwards.
 
 ## What the isolation covers
 

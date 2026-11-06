@@ -1,10 +1,20 @@
 # Notes: {{target}}
 
 make_report.py needs text under Authorization, Summary and Gaps. Comments do not count.
+`python scripts/ledger.py resume` prints the Hypotheses section and the last session log entry,
+so a new session starts from them.
 
 ## Authorization
 
 <!-- What the target is, who owns it, what permits this analysis, and what the result is for. -->
+
+## Hypotheses
+
+<!-- One line each, numbered as findings refer to them, with the state it is in:
+- H1: the serial check is a XOR with a fixed key. Open.
+- H2: the length must be 16. Supported by F-003.
+- H3: the key comes from the network. Disproved by F-005.
+-->
 
 ## Summary
 
@@ -16,4 +26,9 @@ make_report.py needs text under Authorization, Summary and Gaps. Comments do not
 
 ## Session log
 
-<!-- Newest entry last: what was tried, what it showed, what comes next. -->
+<!-- One entry per session, newest last, under a ### heading with the date:
+### 2026-11-05
+- Did: decompiled check_serial, read KEY and EXPECTED with --bytes.
+- Showed: F-002 and F-003 inferred; H1 still open.
+- Next: write tests/check_serial.py and verify F-002 as a function.
+-->

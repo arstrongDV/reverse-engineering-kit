@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,9 +17,8 @@ from _common import (
     resolve_work_dir,
     write_atomic,
 )
-from ledger import LEDGER, load_findings, one_line
+from ledger import LEDGER, NOTES, audit_problems, load_findings, notes_sections, one_line, sha256_of
 
-NOTES = "notes.md"
 REPORT = "REPORT.md"
 TEMPLATE = Path(__file__).resolve().parent.parent / "templates" / "report.md"
 REQUIRED_NOTES = ("authorization", "summary", "gaps")
@@ -28,30 +26,13 @@ PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 
 
 def read_notes(work: Path) -> dict[str, str]:
-    path = work / NOTES
-    if not path.is_file():
+    if not (work / NOTES).is_file():
         raise KitError(f"{NOTES} is missing. Start it from templates/notes.md.")
-    text = re.sub(r"<!--.*?-->", "", path.read_text(encoding="utf-8"), flags=re.DOTALL)
-    sections: dict[str, list[str]] = {}
-    current = None
-    for line in text.split("\n"):
-        if line.startswith("## "):
-            current = sections.setdefault(line[3:].strip().lower(), [])
-        elif current is not None:
-            current.append(line)
-    notes = {name: "\n".join(lines).strip() for name, lines in sections.items()}
+    notes = notes_sections(work)
     empty = [name for name in REQUIRED_NOTES if not notes.get(name)]
     if empty:
         raise KitError(f"{NOTES} needs text under: {', '.join(empty)}")
     return notes
-
-
-def sha256_of(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as file:
-        for chunk in iter(lambda: file.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def hash_originals(work: Path) -> str:
@@ -70,8 +51,13 @@ def render_finding(finding: dict) -> str:
         f"  - Location: {one_line(finding['location'])}",
         f"  - Evidence: {one_line(finding['evidence'])}",
     ]
-    if finding["verified_by"]:
-        lines.append(f"  - Verified by: {one_line(finding['verified_by'])}")
+    record = finding["verification"]
+    if record:
+        verified = f"{one_line(record['check'])}, a {record['kind']} check: "
+        verified += f"{record['passed']} cases passed, none failed"
+        if record["inputs"]:
+            verified += f", on {', '.join(one_line(item['path']) for item in record['inputs'])}"
+        lines.append(f"  - Verified by: {verified}")
     if "retracted" in finding:
         lines.append(f"  - Retracted: {one_line(finding['retracted'])}")
     return "\n".join(lines)
@@ -96,6 +82,12 @@ def build_report(work: Path) -> tuple[str, dict[str, int]]:
     findings = load_findings(work)
     if not findings:
         raise KitError(f"{LEDGER} has no findings to report")
+    problems = audit_problems(work, findings)
+    if problems:
+        raise KitError(
+            "confirmed findings must still match the checks that proved them. Run verify again "
+            "or retract each one:\n" + "\n".join(problems)
+        )
     active = [finding for finding in findings if "retracted" not in finding]
     groups = {
         level: [finding for finding in active if finding["confidence"] == level]

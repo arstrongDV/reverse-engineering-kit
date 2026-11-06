@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Reverse Engineering Kit finding",
-  "description": "One line of findings.jsonl.",
+  "description": "One line of findings.jsonl. Only ledger.py verify writes a verification record, after the check passed.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "claim", "location", "evidence", "confidence", "verified_by", "hypothesis", "ts"],
+  "required": ["id", "claim", "location", "evidence", "confidence", "verified_by", "verification", "hypothesis", "ts"],
   "properties": {
     "id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
     "claim": { "type": "string", "pattern": "\\S" },
@@ -12,6 +12,7 @@
     "evidence": { "type": "string", "pattern": "\\S" },
     "confidence": { "enum": ["unknown", "inferred", "observed", "confirmed"] },
     "verified_by": { "type": ["string", "null"] },
+    "verification": { "type": ["object", "null"] },
     "hypothesis": { "type": ["string", "null"], "pattern": "^H[0-9]+$" },
     "ts": { "type": "string", "format": "date-time" },
     "retracted": { "type": "string", "pattern": "\\S" }
@@ -20,6 +21,56 @@
     "properties": { "confidence": { "const": "confirmed" } }
   },
   "then": {
-    "properties": { "verified_by": { "type": "string", "pattern": "\\S" } }
+    "properties": {
+      "verified_by": { "type": "string", "pattern": "\\S" },
+      "verification": { "$ref": "#/$defs/verification" }
+    }
+  },
+  "else": {
+    "properties": { "verification": { "type": "null" } }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "check", "sha256", "inputs", "exit_code", "passed", "failed", "cases", "ts"],
+      "properties": {
+        "kind": { "enum": ["function", "algorithm", "decoder", "endpoint", "behavior"] },
+        "check": { "type": "string", "pattern": "\\S" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": { "type": "string", "pattern": "\\S" },
+              "sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        },
+        "exit_code": { "const": 0 },
+        "passed": { "type": "integer", "minimum": 1 },
+        "failed": { "const": 0 },
+        "cases": { "type": "array", "items": { "type": "string" } },
+        "ts": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "function" } } },
+          "then": { "properties": { "passed": { "minimum": 3 } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "algorithm" } } },
+          "then": { "properties": { "passed": { "minimum": 2 } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "decoder" } } },
+          "then": { "properties": { "inputs": { "minItems": 1 } } }
+        }
+      ]
+    }
   }
 }

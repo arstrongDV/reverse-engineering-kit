@@ -58,6 +58,7 @@ FINISHED_REFERENCES = [
     "decompiler-lies.md",
     "js-electron.md",
     "legal-safety.md",
+    "mcp-setup.md",
     "native.md",
     "protocols.md",
 ]
@@ -91,9 +92,23 @@ def finding(**overrides) -> dict:
         "evidence": "line reference and OkHttp post() call",
         "confidence": "inferred",
         "verified_by": None,
+        "verification": None,
         "hypothesis": "H3",
         "ts": "2026-11-02T10:14:00Z",
     } | overrides
+
+
+RECORD = {
+    "kind": "endpoint",
+    "check": "tests/test_auth.py",
+    "sha256": "0" * 64,
+    "inputs": [{"path": "captures/login.pcapng", "sha256": "1" * 64}],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "cases": ["PASS POST /v1/auth seen in captures/login.pcapng"],
+    "ts": "2026-11-02T10:15:00Z",
+}
 
 
 @pytest.fixture
@@ -108,13 +123,24 @@ def test_schema_accepts_inferred_finding(validator):
 
 
 def test_schema_accepts_confirmed_finding_with_verification(validator):
-    validator.validate(finding(confidence="confirmed", verified_by="tests/test_auth.py"))
+    confirmed = finding(
+        confidence="confirmed", verified_by="tests/test_auth.py", verification=RECORD
+    )
+    validator.validate(confirmed)
 
 
-@pytest.mark.parametrize("verified_by", [None, ""])
-def test_schema_rejects_confirmed_finding_without_verification(validator, verified_by):
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"verified_by": None, "verification": RECORD},
+        {"verified_by": "", "verification": RECORD},
+        {"verified_by": "tests/test_auth.py", "verification": None},
+        {"verified_by": "tests/test_auth.py", "verification": RECORD | {"exit_code": 1}},
+    ],
+)
+def test_schema_rejects_confirmed_finding_without_verification(validator, changes):
     with pytest.raises(jsonschema.ValidationError):
-        validator.validate(finding(confidence="confirmed", verified_by=verified_by))
+        validator.validate(finding(confidence="confirmed", **changes))
 
 
 def test_all_ten_benchmarks_declare_their_expected_result():

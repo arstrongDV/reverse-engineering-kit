@@ -168,5 +168,5 @@ $ python scripts/run_ghidra.py --bytes KEY:4 --bytes EXPECTED:16
 Inverting the check in Python (rotate right by 3, then XOR) gave `RK26-XOR7-ROL3-A`. A Python
 model of the check and the real binary, run inside the VM, then agreed on four inputs: that
 serial, two serials with one character changed, and one of 14 characters. Agreement on at least
-three inputs is what a recovered function needs before `confirmed`, so the finding was verified
-by naming the script that ran them.
+three inputs is what a recovered function needs before `confirmed`, so `ledger.py verify --kind
+function` ran that script, saw four `PASS` lines, and only then confirmed the finding.

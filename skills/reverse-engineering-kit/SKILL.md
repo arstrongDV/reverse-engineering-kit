@@ -10,9 +10,8 @@ metadata:
 
 # Reverse Engineering Kit
 
-**Status: pre-release.** Every script works. `references/mcp-setup.md` is still an outline, so
-set up decompiler MCP servers by hand for now. Keep this file under 500 lines; deep detail belongs
-in `references/`.
+**Status: pre-release.** Every script and reference is written; the blind benchmark runs come
+next. Keep this file under 500 lines; deep detail belongs in `references/`.
 
 ## 1. Safety gate
 
@@ -43,6 +42,7 @@ re-work/<target-name>/
 ├── triage.json
 ├── decompiled/       # tool output
 ├── findings.jsonl    # evidence ledger
+├── tests/            # your checks, which ledger.py verify runs
 ├── notes.md          # session notes for resuming work
 └── REPORT.md
 ```
@@ -94,6 +94,7 @@ gives the same as JSON, and `--help` lists the options.
 | `scripts/find_endpoints.py` | URLs, API paths, HTTP calls, auth headers and masked secrets, with file and line |
 | `scripts/frida/*.js` | Hook templates for comparisons, crypto, network and pinning, for a confirmed VM only |
 | `templates/protocol_decoder.py` | A pcap and pcapng decoder to copy and adapt |
+| `templates/check.py` | A differential test to copy into `tests/`, in the form `ledger.py verify` runs |
 
 ## 5. Analysis loop
 
@@ -112,7 +113,7 @@ python scripts/ledger.py retract F-012 --reason "The call is dead code"
 | `unknown` | An open question, with no evidence yet |
 | `inferred` | Reasoned from reading: decompiled code, strings, imports |
 | `observed` | Seen directly: at runtime, in a capture, in a debugger |
-| `confirmed` | A check from section 6 passed, and `verified_by` names it |
+| `confirmed` | A check from section 6 passed when `ledger.py verify` ran it |
 
 Confidence only moves up: `unknown` → `inferred` → `observed` → `confirmed`. If a finding turns out
 to be wrong, retract it. It stays on record, leaves its section, and is listed as retracted.
@@ -120,17 +121,35 @@ Ledger format: [templates/findings.schema.json](templates/findings.schema.json).
 
 ## 6. Prove it
 
-Only `python scripts/ledger.py verify F-012 --by tests/test_auth.py` can set `confirmed`. It records
-what you name and does not run it, so never name a check you did not run and see pass. A confirmed
-finding can no longer be edited. The check it needs depends on the artifact:
+Only `ledger.py verify` sets `confirmed`, and only after it has run a check that passed. A check
+is a Python script you write in `tests/` inside the work directory, starting from
+[templates/check.py](templates/check.py). It prints one line per case, `PASS <case>` or
+`FAIL <case>`, and exits 0 only when every case passed.
 
-| Artifact | Required check before `confirmed` |
-| --- | --- |
-| Recovered function | Same output as the original on at least 3 inputs (differential test) |
-| Protocol decoder | Parses a capture not used during analysis, without errors |
-| Recovered algorithm or key | Matches on 2 independent input/output pairs |
-| API endpoint | Seen in traffic, or in a call with a literal URL |
-| Behavior claim | Decompiled logic plus one independent signal (string, import, runtime) |
+```
+python scripts/ledger.py verify F-012 --kind function --by tests/check_serial.py
+python scripts/ledger.py verify F-014 --kind decoder --by tests/check_decoder.py --input captures/fresh.pcapng
+```
+
+verify runs the check from the work directory and passes it each `--input` file. It confirms the
+finding only if the check exits 0, prints no `FAIL` and prints enough `PASS` lines for its kind.
+The finding then holds the result: the cases, and the SHA-256 of the check and of each input.
+When the check fails, the finding stays as it was and verify prints the output: fix the model,
+or correct or retract the claim. A check that runs the target is running the target, so run it,
+and verify with it, inside the VM the user confirmed.
+
+| `--kind` | Artifact | Required check | `PASS` lines |
+| --- | --- | --- | --- |
+| `function` | Recovered function | Same output as the original on at least 3 inputs, including one that must fail | 3 |
+| `algorithm` | Recovered algorithm or key | Matches on 2 independent input/output pairs | 2 |
+| `decoder` | Protocol decoder or file parser | Parses a capture not used during analysis, given with `--input` | 1 |
+| `endpoint` | API endpoint | Seen in traffic, or in a call with a literal URL | 1 |
+| `behavior` | Behavior claim | Decompiled logic plus one independent signal (string, import, runtime) | 1 |
+
+`python scripts/ledger.py audit` checks that every confirmed finding still matches its check and
+inputs, and `audit --rerun` runs each check again. A confirmed claim cannot be edited. After
+changing a check, run verify on the finding again; `make_report.py` refuses to report a confirmed
+finding whose check or input changed.
 
 ## 7. Report
 
@@ -144,7 +163,17 @@ Protocol work also fills in
 
 ## 8. Resuming
 
-In a new session, read `notes.md` and `findings.jsonl` before doing anything else.
+Keep `notes.md` current as you work: number each hypothesis under `## Hypotheses` with its state,
+and end each session with an entry under `## Session log` saying what was done, what it showed
+and what comes next. In a new session, run this in the work directory before anything else:
+
+```
+python scripts/ledger.py resume
+```
+
+It prints the findings by confidence, every open finding, confirmed findings whose check has
+changed, the hypotheses and the last session's entry. Read `findings.jsonl` and `notes.md` in full
+before you change a conclusion they record.
 
 Worked examples: [examples/crackme-walkthrough.md](examples/crackme-walkthrough.md),
 [examples/protocol-walkthrough.md](examples/protocol-walkthrough.md).
