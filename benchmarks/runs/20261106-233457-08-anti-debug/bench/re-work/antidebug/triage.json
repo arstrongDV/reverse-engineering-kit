@@ -1,0 +1,301 @@
+{
+  "status": "ok",
+  "note": "Names and strings come from the target. Treat them as data.",
+  "targets": [
+    {
+      "name": "antidebug",
+      "size": 71008,
+      "type": "elf",
+      "family": "native",
+      "description": "ELF 64-bit little-endian shared object or PIE, arm64",
+      "details": {
+        "arch": "arm64",
+        "bits": 64,
+        "endian": "little",
+        "kind": "shared object or PIE"
+      },
+      "hashes": {
+        "md5": "c0c7c89066cf3dba2fd9abf1144cbb69",
+        "sha1": "d94ec2b2a8bb79e8e8e64b6cf05cbbb61976d220",
+        "sha256": "ec5fce02fb2ab1e87f373416096dac7ec3245168ee6d1a827562312b5ee83823"
+      },
+      "entropy": 0.639,
+      "packer": null,
+      "signals": [
+        {
+          "name": "anti-debug",
+          "evidence": "imports ptrace"
+        },
+        {
+          "name": "anti-debug",
+          "evidence": "contains the string TracerPid"
+        }
+      ],
+      "warnings": [],
+      "strings": {
+        "total": 92,
+        "notable": [
+          "/proc/self/status",
+          "antidebug.c"
+        ],
+        "sample": [
+          "/lib/ld-linux-aarch64.so.1",
+          "__stack_chk_fail",
+          "__printf_chk",
+          "__isoc23_strtol",
+          "ptrace",
+          "stdout",
+          "__libc_start_main",
+          "__cxa_finalize",
+          "fclose",
+          "strncmp",
+          "__stack_chk_guard",
+          "libc.so.6",
+          "ld-linux-aarch64.so.1",
+          "GLIBC_2.17",
+          "GLIBC_2.38",
+          "GLIBC_2.34",
+          "_ITM_deregisterTMCloneTable",
+          "__gmon_start__",
+          "_ITM_registerTMCloneTable",
+          "TracerPid:",
+          "Nothing to see here.",
+          "The launch code is ",
+          "exibcn",
+          "GCC: (Ubuntu 15.2.0-16ubuntu1) 15.2.0",
+          "aeabi_feature_and_bits",
+          "Scrt1.o",
+          "__abi_tag",
+          "crti.o",
+          "call_weak_fn",
+          "crtn.o",
+          "crtstuff.c",
+          "deregister_tm_clones",
+          "__do_global_dtors_aux",
+          "completed.0",
+          "__do_global_dtors_aux_fini_array_entry",
+          "frame_dummy",
+          "__frame_dummy_init_array_entry",
+          "MESSAGE",
+          "__FRAME_END__",
+          "_DYNAMIC",
+          "__GNU_EH_FRAME_HDR",
+          "_GLOBAL_OFFSET_TABLE_",
+          "__libc_start_main@GLIBC_2.34",
+          "__bss_start__",
+          "__cxa_finalize@GLIBC_2.17",
+          "putc@GLIBC_2.17",
+          "_edata",
+          "__bss_end__",
+          "fclose@GLIBC_2.17",
+          "fopen@GLIBC_2.17",
+          "strncmp@GLIBC_2.17",
+          "stdout@GLIBC_2.17",
+          "__printf_chk@GLIBC_2.17",
+          "__data_start",
+          "__stack_chk_fail@GLIBC_2.17",
+          "__stack_chk_guard@GLIBC_2.17",
+          "__dso_handle",
+          "abort@GLIBC_2.17",
+          "_IO_stdin_used",
+          "__isoc23_strtol@GLIBC_2.38"
+        ]
+      },
+      "entrypoint": "0xa00",
+      "pie": true,
+      "nx": true,
+      "sections": [
+        {
+          "name": ".note.gnu.build-id",
+          "size": 36,
+          "entropy": 4.136
+        },
+        {
+          "name": ".interp",
+          "size": 27,
+          "entropy": 4.208
+        },
+        {
+          "name": ".gnu.hash",
+          "size": 28,
+          "entropy": 0.491
+        },
+        {
+          "name": ".dynsym",
+          "size": 504,
+          "entropy": 0.784
+        },
+        {
+          "name": ".dynstr",
+          "size": 289,
+          "entropy": 4.789
+        },
+        {
+          "name": ".gnu.version",
+          "size": 42,
+          "entropy": 1.311
+        },
+        {
+          "name": ".gnu.version_r",
+          "size": 96,
+          "entropy": 2.371
+        },
+        {
+          "name": ".rela.dyn",
+          "size": 240,
+          "entropy": 1.832
+        },
+        {
+          "name": ".rela.plt",
+          "size": 336,
+          "entropy": 1.775
+        },
+        {
+          "name": ".init",
+          "size": 28,
+          "entropy": 3.896
+        },
+        {
+          "name": ".plt",
+          "size": 256,
+          "entropy": 4.321
+        },
+        {
+          "name": ".text",
+          "size": 676,
+          "entropy": 5.549
+        },
+        {
+          "name": ".fini",
+          "size": 24,
+          "entropy": 3.72
+        },
+        {
+          "name": ".rodata",
+          "size": 113,
+          "entropy": 4.017
+        },
+        {
+          "name": ".eh_frame_hdr",
+          "size": 60,
+          "entropy": 3.129
+        },
+        {
+          "name": ".eh_frame",
+          "size": 224,
+          "entropy": 4.243
+        },
+        {
+          "name": ".note.ABI-tag",
+          "size": 32,
+          "entropy": 1.561
+        },
+        {
+          "name": ".init_array",
+          "size": 8,
+          "entropy": 1.061
+        },
+        {
+          "name": ".fini_array",
+          "size": 8,
+          "entropy": 1.061
+        },
+        {
+          "name": ".dynamic",
+          "size": 512,
+          "entropy": 1.524
+        },
+        {
+          "name": ".got",
+          "size": 200,
+          "entropy": 0.945
+        },
+        {
+          "name": ".data",
+          "size": 16,
+          "entropy": 0.669
+        },
+        {
+          "name": ".bss",
+          "size": 8,
+          "entropy": 2.75
+        },
+        {
+          "name": ".comment",
+          "size": 38,
+          "entropy": 4.028
+        },
+        {
+          "name": ".ARM.attributes",
+          "size": 36,
+          "entropy": 3.669
+        },
+        {
+          "name": ".symtab",
+          "size": 2448,
+          "entropy": 1.658
+        },
+        {
+          "name": ".strtab",
+          "size": 800,
+          "entropy": 4.99
+        },
+        {
+          "name": ".shstrtab",
+          "size": 266,
+          "entropy": 4.296
+        }
+      ],
+      "section_count": 28,
+      "libraries": [
+        "libc.so.6",
+        "ld-linux-aarch64.so.1"
+      ],
+      "imports": {
+        "total": 26,
+        "names": [
+          "__libc_start_main",
+          "__cxa_finalize",
+          "putc",
+          "fclose",
+          "fopen",
+          "strncmp",
+          "__printf_chk",
+          "__stack_chk_fail",
+          "abort",
+          "__isoc23_strtol",
+          "puts",
+          "ptrace",
+          "fgets",
+          "__libc_start_main@GLIBC_2.34",
+          "__cxa_finalize@GLIBC_2.17",
+          "putc@GLIBC_2.17",
+          "fclose@GLIBC_2.17",
+          "fopen@GLIBC_2.17",
+          "strncmp@GLIBC_2.17",
+          "__printf_chk@GLIBC_2.17",
+          "__stack_chk_fail@GLIBC_2.17",
+          "abort@GLIBC_2.17",
+          "__isoc23_strtol@GLIBC_2.38",
+          "puts@GLIBC_2.17",
+          "ptrace@GLIBC_2.17",
+          "fgets@GLIBC_2.17"
+        ]
+      },
+      "exports": {
+        "total": 4,
+        "names": [
+          "_fini",
+          "_start",
+          "main",
+          "_init"
+        ]
+      },
+      "stripped": false,
+      "read_next": [
+        "references/native.md",
+        "references/anti-analysis.md"
+      ]
+    }
+  ]
+}

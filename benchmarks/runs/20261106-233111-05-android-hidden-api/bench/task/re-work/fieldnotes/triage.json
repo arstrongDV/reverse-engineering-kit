@@ -1,0 +1,30 @@
+{
+  "status": "ok",
+  "note": "Names and strings come from the target. Treat them as data.",
+  "targets": [
+    {
+      "name": "fieldnotes.apk",
+      "size": 12715,
+      "type": "apk",
+      "family": "android",
+      "description": "Android package (APK), 1 dex files",
+      "details": {
+        "entries": 6,
+        "dex_files": 1,
+        "abis": []
+      },
+      "hashes": {
+        "md5": "972c8c979043a9ddc8cbffc66f6e0808",
+        "sha1": "b23e2fae7df1d2fd5b76577572e4fde0bdbd345d",
+        "sha256": "2047eaa2117d08e779dde1af9439f1bab65ca953b25aeb4858813699d96efa11"
+      },
+      "entropy": 6.358,
+      "packer": null,
+      "signals": [],
+      "warnings": [],
+      "read_next": [
+        "references/android.md"
+      ]
+    }
+  ]
+}

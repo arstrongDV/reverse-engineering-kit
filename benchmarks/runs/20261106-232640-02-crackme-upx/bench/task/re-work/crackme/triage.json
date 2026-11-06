@@ -1,0 +1,123 @@
+{
+  "status": "ok",
+  "note": "Names and strings come from the target. Treat them as data.",
+  "targets": [
+    {
+      "name": "crackme-packed",
+      "size": 250836,
+      "type": "elf",
+      "family": "native",
+      "description": "ELF 64-bit little-endian executable, arm64",
+      "details": {
+        "arch": "arm64",
+        "bits": 64,
+        "endian": "little",
+        "kind": "executable"
+      },
+      "hashes": {
+        "md5": "51685b6f032bd5a7b04ae99d9b09bc68",
+        "sha1": "1b8ef6b0dd4e4ea811ec041a6ce96df61f0de17d",
+        "sha256": "76fabff2f4be738c5d5013a500e95669f8dd5b370cdc4bfa73be85f39fcb61ce"
+      },
+      "entropy": 7.839,
+      "packer": {
+        "name": "UPX",
+        "evidence": [
+          "UPX! marker at offset 0x1a0"
+        ]
+      },
+      "signals": [],
+      "warnings": [],
+      "strings": {
+        "total": 709,
+        "notable": [
+          "ckme <serial>",
+          "Correct k",
+          "<https://\"st",
+          "$Info: This file is packed with the UPX executable packer http://upx.sf.net $"
+        ],
+        "sample": [
+          "KUPX!H",
+          "lVNFON",
+          "@@9cjb8!HJ#",
+          "m60/O`",
+          "S\"8^\"<h",
+          "(x\"`g0",
+          "]V{FsFb",
+          "L&3?8z",
+          "D.(v6O",
+          "NavorA",
+          "4 ^4.Q",
+          "~?h\"8>",
+          "`>4V5xt",
+          "_>FNJu_cG",
+          "? ib8PlaR*",
+          "N&Ov`w",
+          "3_?.8f=iG",
+          "H^p0;l'",
+          "oLph|G",
+          "fNwB  ",
+          "NCfAq>",
+          "5_._,BA",
+          "d&Qb~@",
+          "V6>,N`u",
+          "x&yf_&p{",
+          ";'kOn7B",
+          "VNFWOL",
+          "y#cg.@",
+          "\"a~6!v",
+          "a\"WxJf",
+          "NgWgwg",
+          "I>`2w ",
+          ", I,tC",
+          "P`n_>#F",
+          "~GaFtOgD)",
+          "@*Gd(&",
+          "^6%&NV",
+          "&O (pad3`BY",
+          "+hI|f7",
+          ";{o`!.",
+          "i;~_?}",
+          "GP.^ }",
+          "@^R/?9",
+          ",O@6WnTZ",
+          "@l].?w",
+          " 0.w04",
+          "g@>BC7H/F",
+          "h`xq)`{",
+          "`ha`h!x",
+          "(nF*xa",
+          "o8/4wo",
+          "_FL'L\\Xx",
+          "Fg/2@(",
+          "kP-t8>",
+          "NAp@L#",
+          "j`8cha8",
+          "5v^*WP",
+          "^(hn8>9",
+          "bnW*,@6",
+          "``````"
+        ]
+      },
+      "entrypoint": "0x4ebe8c",
+      "pie": false,
+      "nx": true,
+      "sections": [],
+      "section_count": 0,
+      "libraries": [],
+      "imports": {
+        "total": 0,
+        "names": []
+      },
+      "exports": {
+        "total": 0,
+        "names": []
+      },
+      "stripped": true,
+      "read_next": [
+        "references/native.md",
+        "references/anti-analysis.md"
+      ]
+    }
+  ]
+}

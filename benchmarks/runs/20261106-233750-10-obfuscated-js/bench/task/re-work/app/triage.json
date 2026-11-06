@@ -1,0 +1,42 @@
+{
+  "status": "ok",
+  "note": "Names and strings come from the target. Treat them as data.",
+  "targets": [
+    {
+      "name": "app.obfuscated.js",
+      "size": 5468,
+      "type": "javascript",
+      "family": "js",
+      "description": "minified JavaScript",
+      "details": {
+        "lines": 1,
+        "average_line_length": 5468,
+        "minified": true,
+        "bundler": null,
+        "source_map": null
+      },
+      "hashes": {
+        "md5": "2496dfe7d6a1d90e43ba7eb7d26899d2",
+        "sha1": "684631f98888cd208dd690d803efb83fd17f1465",
+        "sha256": "cb66988e14d605df0bf814f12fdd4b3ecf2c946757d22931494ea2480ceb1ad5"
+      },
+      "entropy": 5.425,
+      "packer": null,
+      "signals": [
+        {
+          "name": "obfuscated-js",
+          "evidence": "285 names like _0x1a2b"
+        },
+        {
+          "name": "obfuscated-js",
+          "evidence": "a loop around a switch, the usual sign of a flattened control flow"
+        }
+      ],
+      "warnings": [],
+      "read_next": [
+        "references/js-electron.md",
+        "references/anti-analysis.md"
+      ]
+    }
+  ]
+}
