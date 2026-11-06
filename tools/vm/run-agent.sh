@@ -60,7 +60,8 @@ if [[ -n "$MODEL" ]]; then
 fi
 # WebSearch runs on Anthropic's side, so the firewall cannot stop it: turn both web tools off.
 set +e
-# shellcheck disable=SC2016
+# The redirects run as root on purpose, so bench cannot touch the transcript it produces.
+# shellcheck disable=SC2016,SC2024
 sudo -u bench -H bash -c '
   set -euo pipefail
   token="$(cat ~/.token)"

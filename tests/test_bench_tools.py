@@ -42,7 +42,9 @@ def test_staging_copies_the_built_targets_and_nothing_else(tmp_path):
     entry = {"artifacts": ["build/resources/app.asar"], "deliverable": "An IPC map"}
     (bench / "expected.json").write_text(json.dumps(entry))
     stage(bench, tmp_path / "out")
-    files = sorted(str(p.relative_to(tmp_path / "out")) for p in (tmp_path / "out").rglob("*"))
+    files = sorted(
+        p.relative_to(tmp_path / "out").as_posix() for p in (tmp_path / "out").rglob("*")
+    )
     assert files == ["prompt.txt", "task", "task/resources", "task/resources/app.asar"]
 
 
@@ -129,7 +131,7 @@ def test_saving_keeps_the_agents_text_but_not_tool_output_or_the_target(run, tmp
     (work / "tests").mkdir()
     (work / "tests" / "check.py").write_text("print('PASS a')")
     saved = save(run, tmp_path / "kept")
-    names = sorted(str(path.relative_to(tmp_path / "kept" / run.name)) for path in saved)
+    names = sorted(path.relative_to(tmp_path / "kept" / run.name).as_posix() for path in saved)
     assert names == [
         "bench/task/re-work/crackme/REPORT.md",
         "bench/task/re-work/crackme/findings.jsonl",

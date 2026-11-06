@@ -111,7 +111,7 @@ def summarize(run: Path) -> dict:
         markers = entry.get("answer_markers", [])
         summary["work_dirs"].append(
             {
-                "path": str(work.relative_to(run)),
+                "path": work.relative_to(run).as_posix(),
                 "ledger": (work / "findings.jsonl").is_file(),
                 "report": (work / "REPORT.md").is_file(),
                 "confidence": count_confidence(findings),
@@ -172,7 +172,7 @@ def save(run: Path, destination: Path) -> list[Path]:
     files = evidence(run)
     leaked = [path for path in files if CREDENTIAL.search(path.read_text("utf-8"))]
     if leaked:
-        names = ", ".join(str(path.relative_to(run)) for path in leaked)
+        names = ", ".join(path.relative_to(run).as_posix() for path in leaked)
         raise ScoreError(f"refusing to keep files that hold a credential: {names}")
     target = destination / run.name
     for path in files:
@@ -191,7 +191,8 @@ def main() -> int:
         summary = summarize(args.run.resolve())
         if args.save:
             summary["saved"] = [
-                str(path.relative_to(REPO_ROOT)) for path in save(args.run.resolve(), KEPT_RUNS)
+                path.relative_to(REPO_ROOT).as_posix()
+                for path in save(args.run.resolve(), KEPT_RUNS)
             ]
     except ScoreError as error:
         print(f"score_run: {error}", file=sys.stderr)
