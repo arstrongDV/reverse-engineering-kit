@@ -53,6 +53,8 @@ All notable changes to this project are documented here. The format follows
 - `vm.sh install-agent` and `vm.sh run-benchmark`, which run Claude Code on one benchmark in the
   VM as a user without `sudo`, with only Anthropic's API reachable and the web tools turned off,
   and `tools/score_run.py`, which summarizes a run for scoring.
+- `examples/crackme-walkthrough.md` and `examples/protocol-walkthrough.md`, shortened from real
+  benchmark runs, the second including where the run went wrong. Benchmark runs leave them out.
 
 ### Changed
 

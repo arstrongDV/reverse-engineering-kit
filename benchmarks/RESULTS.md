@@ -72,8 +72,12 @@ API prices, as Claude Code reported it.
 
 The held-back capture contains message type 6 and a flag bit that the analysis capture does not,
 yet `expected.json` lists type 6 in the dictionary. A blind run cannot know it, so the answer key
-is partly impossible. The skill's decoder template also counts an unknown message type as a
-problem, which made the first decoder fail on a capture it had framed correctly.
+is partly impossible. The first decoder failed on that capture, although it had framed it
+correctly, because of two rules the run wrote into the template's `check()` hook: an unnamed type
+is a problem, and so is a nonzero flag. The template itself accepts every frame by default. Both
+the benchmark and the template are left as they are for v1.0.
+[examples/protocol-walkthrough.md](../skills/reverse-engineering-kit/examples/protocol-walkthrough.md)
+walks through this run.
 
 ## Earlier runs
 
