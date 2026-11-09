@@ -55,6 +55,8 @@ All notable changes to this project are documented here. The format follows
   and `tools/score_run.py`, which summarizes a run for scoring.
 - `examples/crackme-walkthrough.md` and `examples/protocol-walkthrough.md`, shortened from real
   benchmark runs, the second including where the run went wrong. Benchmark runs leave them out.
+- `docs/demo.gif` in the README, a replay of benchmark 1's real run, rendered by
+  `tools/demo_gif.py`. A test checks that every line it shows is in the kept transcript.
 
 ### Changed
 
