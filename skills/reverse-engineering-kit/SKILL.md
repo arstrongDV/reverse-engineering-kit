@@ -5,13 +5,10 @@ license: MIT
 compatibility: Requires Python 3.10+. LIEF and the analysis tools are optional per target and are checked by scripts/doctor.py.
 metadata:
   author: Arsen Datsenko
-  version: "0.1.0"
+  version: "1.0.0"
 ---
 
 # Reverse Engineering Kit
-
-**Status: pre-release.** Every script and reference is written; the blind benchmark runs come
-next. Keep this file under 500 lines; deep detail belongs in `references/`.
 
 ## Required in every analysis
 

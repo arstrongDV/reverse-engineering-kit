@@ -11,9 +11,8 @@ The demo replays a real run, shortened: Claude Code with this skill on benchmark
 the binary. Every line in it comes from the
 [kept transcript](benchmarks/runs/20261106-232142-01-crackme-xor/).
 
-> **Status: pre-release.** In the first blind round, Claude Code with this skill solved 9 of the 10
-> benchmarks, and none of its 20 confirmed findings was wrong. See
-> [benchmarks/RESULTS.md](benchmarks/RESULTS.md).
+> **v1.0.0.** In a blind round, Claude Code with this skill solved 9 of the 10 benchmarks, and none
+> of its 20 confirmed findings was wrong. See [benchmarks/RESULTS.md](benchmarks/RESULTS.md).
 
 ## Planned coverage
 
