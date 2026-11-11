@@ -3,8 +3,10 @@
 A free, MIT-licensed skill for evidence-first reverse engineering of software you own or are
 authorized to analyze.
 
-**Status: pre-release.** Every script and reference is written and tested. No agent has run the
-benchmarks yet.
+**Version 1.0.0.** In a blind test on ten targets built for the purpose, Claude Code with this
+skill solved nine, and none of the findings it confirmed was wrong. The results, and the
+transcript of every run, are in the project repository:
+https://github.com/arstrongDV/reverse-engineering-kit
 
 ## Using it
 

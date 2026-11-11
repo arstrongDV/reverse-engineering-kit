@@ -4,8 +4,15 @@ One free, open-source agent skill for reverse engineering binaries, Android pack
 and Electron apps, network protocols and crackmes. It drives standard free tools, and it keeps a
 findings ledger where no claim counts as confirmed until a test proves it.
 
-> **Status: pre-release.** Every script and reference is written and tested. No agent has run the
-> benchmarks yet.
+![A real benchmark run, replayed: the agent finds a crackme's serial, proves it by running the
+binary, and records it as a confirmed finding](docs/demo.gif)
+
+The demo replays a real run, shortened: Claude Code with this skill on benchmark 1, with nothing but
+the binary. Every line in it comes from the
+[kept transcript](benchmarks/runs/20261106-232142-01-crackme-xor/).
+
+> **v1.0.0.** In a blind round, Claude Code with this skill solved 9 of the 10 benchmarks, and none
+> of its 20 confirmed findings was wrong. See [benchmarks/RESULTS.md](benchmarks/RESULTS.md).
 
 ## Planned coverage
 
@@ -30,10 +37,12 @@ skills/reverse-engineering-kit/   The skill: this folder is what ships
 ├── scripts/                      Tools that do the mechanical work
 ├── templates/                    Report, message dictionary, ledger schema, decoder skeleton
 └── examples/                     Walkthroughs taken from real benchmark runs
-benchmarks/                       Ten legal test targets and their expected results
+benchmarks/                       Ten legal test targets, their expected results and kept runs
+docs/demo.gif                     The demo above, rendered by tools/demo_gif.py
 tests/                            pytest suite, run in CI
-tools/build_zip.py                Builds the marketplace zip
-tools/vm/                         Disposable Linux test VM with snapshots
+tools/build_zip.py                Builds the marketplace zip, and the blind copy for benchmark runs
+tools/score_run.py                Summarizes a benchmark run for scoring
+tools/vm/                         Disposable Linux test VM with snapshots and the benchmark runner
 ```
 
 ## Development

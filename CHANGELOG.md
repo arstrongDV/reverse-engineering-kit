@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-11
+
+The first release: native binaries, Android packages, JavaScript bundles and Electron apps, network
+protocols and file formats, and crackmes, with a findings ledger that confirms a claim only after a
+check has passed. In a blind round, Claude Code with the skill solved 9 of the 10 benchmarks with
+no false confirmations.
+
 ### Added
 
 - Project scaffold: skill folder, script stubs, reference outlines, benchmark layout, CI and the
@@ -55,6 +62,8 @@ All notable changes to this project are documented here. The format follows
   and `tools/score_run.py`, which summarizes a run for scoring.
 - `examples/crackme-walkthrough.md` and `examples/protocol-walkthrough.md`, shortened from real
   benchmark runs, the second including where the run went wrong. Benchmark runs leave them out.
+- `docs/demo.gif` in the README, a replay of benchmark 1's real run, rendered by
+  `tools/demo_gif.py`. A test checks that every line it shows is in the kept transcript.
 
 ### Changed
 
@@ -82,3 +91,6 @@ All notable changes to this project are documented here. The format follows
 - `SKILL.md` asked for the target's SHA-256 to be recorded without saying where, so an agent saved
   it as a file in `original/`, which the report then hashed as a second target. It now says to
   keep nothing else there, since `make_report.py` records the hashes.
+
+[Unreleased]: https://github.com/arstrongDV/reverse-engineering-kit/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/arstrongDV/reverse-engineering-kit/releases/tag/v1.0.0
